@@ -17,7 +17,11 @@
         "height": 600,
         "resizable": true,
         "fullscreen": false,
-	"url": "http://localhost:3000/index.html"
+	"url": "http://localhost:3000"
+      },
+      {
+        "label": "subwindow",
+        "title": "Sub Window"
       }
     ],
     "security": {

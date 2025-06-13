@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tauri HTML Fetch Example</title>
+  <script src="./tauri.js"></script> <!-- Tauri JS API -->
+</head>
+<body>
+  <h1>Tauri HTML Fetch Example</h1>
+  <input type="text" id="url-input" placeholder="Enter URL" />
+  <button onclick="fetchHTML()">Fetch HTML</button>
+  <div id="result"></div>
+
+  <script>
+    async function fetchHTML() {
+      const url = document.getElementById("url-input").value;
+      if (!url) {
+        alert("Please enter a URL");
+        return;
+      }
+      try {
+        const html = await window.__TAURI__.invoke('fetch_html', { url });
+        document.getElementById("result").innerHTML = html;
+      } catch (err) {
+        console.error(err);
+        alert("Failed to fetch HTML. See console for details.");
+      }
+    }
+  </script>
+</body>
+</html>
+

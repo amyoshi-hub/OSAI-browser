@@ -1,0 +1,9 @@
+{
+  "type": "module",
+  "dependencies": {
+    "@fastify/static": "^6.11.0",
+    "chrome-remote-interface": "^0.33.0",
+    "fastify": "^4.22.2",
+    "lit": "^3.3.0"
+  }
+}

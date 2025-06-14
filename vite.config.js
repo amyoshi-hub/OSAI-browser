@@ -6,9 +6,9 @@ export default defineConfig({
     server: {
         port: 3000, // Tauri の設定に一致させる
     },
-    root: './html', // 必要に応じて調整
+    root: './src_view/view', // 必要に応じて調整
     build: {
-        outDir: '../dist', // 必要に応じて調整
+        outDir: './dist', // 必要に応じて調整
     },
 });
 

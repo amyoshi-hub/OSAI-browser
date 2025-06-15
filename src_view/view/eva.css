@@ -1,0 +1,87 @@
+p {
+    position: relative;
+    padding: 2rem 1rem 1rem;
+    background-color: #000;
+    color: #fff;
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 900;
+    font-size: 30px;
+    text-align: center;
+    transform: scaleY(1.5);
+    letter-spacing: -0.1rem
+}
+
+p::before {
+    position: absolute;
+    top: 0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #CE3F2C;
+    font-size: 16px;
+    content: attr(data-sub-title);
+}
+
+.box-alert {
+    position: relative;
+    padding: 2rem;
+    background-color: #040404;
+}
+
+.box-alert::before,
+.box-alert::after {
+    position: absolute;
+    height: 10px;
+    width: 100%;
+    content: '';
+}
+
+.box-alert::before {
+    top: 5px;
+    left: 0;
+}
+
+.box-alert::after {
+    bottom: 5px;
+    left: 0;
+}
+
+.box-alert-info {
+    color: #087DF9;
+}
+
+.box-alert-info::before,
+.box-alert-info::after {
+    background: repeating-linear-gradient(-45deg, transparent 0 4px, #087DF9 4px 8px);
+}
+
+
+.box-alert i {
+    margin-right: 0.5rem;
+}
+
+.box-alert>a {
+    cursor: pointer;
+    margin-left: auto;
+}
+
+
+.alert-title,
+.box-alert p {
+    font-family: 'Noto Serif JP', serif;
+    text-align: center;
+    transform: scaleY(1.5);
+    letter-spacing: -0.1rem;
+}
+
+.alert-title {
+    font-size: 50px;
+    font-weight: 900;
+    margin-bottom: 2rem;
+}
+
+
+.hide-box {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s, visibility 1s;
+}

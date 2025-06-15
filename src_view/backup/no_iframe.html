@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Browser</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
+        .address-bar { display: flex; padding: 10px; background-color: #fff; }
+        #main-content { flex-grow: 1; width: 100%; height: calc(100vh - 50px); border: none; }
+    </style>
+</head>
+<body>
+    <div class="address-bar">
+        <input type="text" id="urlInput" placeholder="URLを入力" />
+        <button id="toggleMode">Toggle Mode</button>
+    </div>
+    <iframe id="mainIframe" style="display:none;" src=""></iframe>
+    <script>
+        let useIframe = true;
+        const iframe = document.getElementById('mainIframe');
+        const input = document.getElementById('urlInput');
+        const toggleButton = document.getElementById('toggleMode');
+
+        function updateContent(url) {
+            if (useIframe) {
+                iframe.style.display = 'block';
+                iframe.src = url;
+            } else {
+                window.location.href = url;
+            }
+        }
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') updateContent(input.value);
+        });
+
+        toggleButton.addEventListener('click', () => {
+            useIframe = !useIframe;
+            iframe.style.display = useIframe ? 'block' : 'none';
+        });
+    </script>
+</body>
+</html>
+

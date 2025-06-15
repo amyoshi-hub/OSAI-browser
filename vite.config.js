@@ -8,7 +8,7 @@ export default defineConfig({
     },
     root: './src_view/view', // 必要に応じて調整
     build: {
-        outDir: './dist', // 必要に応じて調整
+        outDir: '../../dist', // 必要に応じて調整
     },
 });
 

@@ -29,11 +29,13 @@
         	<p><i class="fas fa-times-circle"></i><span id="alertMessage"></span></p>
         	<button id="closeAlert">閉じる</button>
     		</div>
+	<a href="world_page.html">select_world</a>
     </div>
     <p id=instruct_text>conduct: 現在Iframe モードです URLを挿入して下さい</p>
     <iframe id="mainIframe"></iframe>
 
     <script>
+	//const { invoke } = window.__TAURI__;
         const input = document.getElementById('urlInput');
         const iframe = document.getElementById('mainIframe');
         const switchModeButton = document.getElementById('switchMode');
@@ -70,11 +72,17 @@
             iframe.style.display = useIframe ? 'block' : 'none';
 		instructText.textContent = `現在: ${useIframe ? 'Iframe モード' : 'NO Iframe モード'}です`;
         });
-	p2pmodebutton.addEventListener('click', () => {
+	p2pmodebutton.addEventListener('click', async () => {
             p2p_mode = !p2p_mode;
             iframe.style.display = p2p_mode ? 'block' : 'none';
 	    showAlert(`p2p モードが${p2p_mode ? "有効" : "無効"}になりました`);
-		//rust呼び出し
+	if (p2p_mode){
+		try {
+			await invoke('start_udp_server', {address: "127.0.0.1:8081"});
+		} catch (error){
+			showAlert('エラー: {error.message}');
+		}
+	}
         });
 	function showAlert(message) {
         	alertMessage.textContent = message;

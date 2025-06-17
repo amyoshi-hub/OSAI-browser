@@ -6,6 +6,8 @@ export default defineConfig({
     server: {
         port: 5173, // Tauri の設定に一致させる
     },
+    clearScreen: false,
+    envPrefix: ['VITE_', 'TAURI_'],
     root: '.', // 必要に応じて調整
     build: {
         outDir: '../dist', // 必要に応じて調整

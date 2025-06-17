@@ -151,7 +151,6 @@ name = "app"
 version = "0.1.0"
 dependencies = [
  "chrono",
- "gtk",
  "log",
  "reqwest",
  "serde",

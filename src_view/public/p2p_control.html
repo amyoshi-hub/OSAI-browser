@@ -1,0 +1,87 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>
+			P2P　MODE
+		</title>
+	</head>
+	<body>
+		<a href="index.html">back_menu</a>
+		<h2>SETUP_AS_SERVER</h2>
+		IP:  <input id="ip" placeholder="127.0.0.1">
+		PORT:<input id="port" placeholder="1234">
+		<br>
+		<button onclick="startServer()">START_SERVER</button>
+
+		<h2>SERVER_LIST</h2>
+		<div id="server_list"></div>
+
+		<h2>P2P channel</h2>
+		<div id="get_text">
+			<p id="view_text">bulletin board</p>
+		</div>
+	</body>
+	    <script>
+        // DOMContentLoaded イベントで実行することで、Tauri APIが確実にロードされるのを待つ
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Tauri APIが利用可能かチェックするユーティリティ関数
+            async function invokeTauri(command, args = {}) {
+                if (window.__TAURI__ && window.__TAURI__.invoke) {
+                    return await window.__TAURI__.invoke(command, args);
+                } else {
+                    console.warn("Tauri invoke is not available. Are you running in a Tauri context?");
+                    throw new Error("Tauri invoke not available.");
+                }
+            }
+
+            function listenTauri(event, handler) {
+                if (window.__TAURI__ && window.__TAURI__.event && window.__TAURI__.event.listen) {
+                    return window.__TAURI__.event.listen(event, handler);
+                } else {
+                    console.warn("Tauri event listen is not available.");
+                    return () => {}; // ダミーのunlisten関数を返す
+                }
+            }
+
+            async function loadText() {
+                try {
+                    const text = await invokeTauri("rust_code");
+                    const viewText = document.getElementById('view_text');
+                    viewText.innerHTML = `<p>${text}</p>`; // 毎回追記ではなく上書き
+                    console.log("Message from Rust:", text);
+                } catch (error){
+                    console.error('Rustコマンド呼び出しエラー:', error);
+                }
+            }
+
+            window.startServer = async function() { // グローバル関数にするために window. をつける
+                const ip = document.getElementById("ip").value;
+                const port = document.getElementById("port").value;
+                console.log(`Starting server at ${ip}:${port}`); // ここもバッククォートに修正
+
+                try {
+                    const result = await invokeTauri("start_server", { ip, port });
+                    console.log("Server command result:", result);
+                    document.getElementById('view_text').innerHTML = `<p>${result}</p>`;
+                } catch (error) {
+                    console.error("サーバー起動エラー:", error);
+                    document.getElementById('view_text').innerHTML = `<p style="color: red;">サーバー起動失敗: ${error}</p>`;
+                }
+            }
+
+            // Tauriイベントリスナーを設定 (Rustからイベントを受け取るため)
+            listenTauri("server_status", (event) => {
+                console.log("Server status event received:", event.payload);
+                document.getElementById('view_text').innerHTML += `<p>${event.payload}</p>`;
+            });
+            listenTauri("udp_data_received", (event) => {
+                console.log("UDP data received:", event.payload);
+                document.getElementById('view_text').innerHTML += `<p style="color: blue;">Received: ${event.payload}</p>`;
+            });
+
+            // 初期ロード時に一度だけloadTextを呼び出す
+            loadText();
+        });
+    </script>
+</html>

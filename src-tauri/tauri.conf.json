@@ -5,7 +5,7 @@
   "identifier": "com.takaku.OSAI-browser",
   "build": {
   "frontendDist": "../dist",
-  "devUrl": "http://localhost:3000/index.html",
+  "devUrl": "http://localhost:5173",
   "beforeDevCommand": "npm run dev",
   "beforeBuildCommand": "npm run build"
 },

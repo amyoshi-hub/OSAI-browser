@@ -1,40 +1,68 @@
-import { useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./App.css";
 
-function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
+const App: React.FC = () => {
+  const [url, setUrl] = useState("");
+  const [useIframe, setUseIframe] = useState(true);
+  const [iframeSrc, setIframeSrc] = useState("");
+  const [instructionText, setInstructionText] = useState("現在Iframe モードです URLを挿入して下さい");
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
-    console.log("send succuses");
-  }
+  const navigate = useNavigate();
+
+  const updateContent = (newUrl: string) => {
+    if (useIframe) {
+      setIframeSrc(newUrl);
+    } else {
+      window.location.href = newUrl;
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUrl(e.target.value);
+  };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      updateContent(url);
+    }
+  };
+
+  const switchMode = () => {
+    const newMode = !useIframe;
+    setUseIframe(newMode);
+    setInstructionText(`現在: ${newMode ? "Iframe モード" : "NO Iframe モード"}です`);
+  };
+
+  const loadP2PPage = () => {
+	  navigate("/p2p");
+  };
+
+  const loadWorldPage = () => {
+    setIframeSrc("world_page.html");
+  };
 
   return (
-    <main className="container">
-      <h1>Welcome to Tauri + React</h1>
-
-     <p>Click on the Tauri, Vite, and React logos to learn more.</p>
-
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
+    <div>
+      <div className="address-bar">
         <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
+          type="text"
+          value={url}
+          onChange={handleInputChange}
+          onKeyDown={handleInputKeyDown}
+          placeholder="URLを入力してください"
         />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
-    </main>
+        <button onClick={switchMode}>Switch Mode</button>
+        <button onClick={loadP2PPage}>P2P</button>
+        <button onClick={loadWorldPage}>WORLD_SELECT</button>
+      </div>
+      <p id="instruct_text">{instructionText}</p>
+      {useIframe && (
+        <iframe id="mainIframe" src={iframeSrc} style={{ width: "100%", height: "calc(100vh - 50px)", border: "none" }} />
+      )}
+    </div>
   );
-}
+};
 
 export default App;
+

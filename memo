@@ -1,0 +1,2 @@
+npm run buildはtauli-app内で
+cargo buildはtopで(ここ)

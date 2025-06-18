@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON読み込みサンプル</title>
+</head>
+<body>
+    <a href="index.html">戻る</a>
+    <div id="content">ここにデータが表示されます。</div>
+
+    <script>
+        // JSONファイルを読み込む関数
+        async function loadJsonFile() {
+            try {
+                // fetchを使ってJSONファイルを取得
+                const response = await fetch('world_list.json');
+
+                // HTTPステータスコードのチェック
+                if (!response.ok) {
+                    throw new Error(`HTTPエラー: ${response.status}`);
+                }
+
+                // JSONデータをパース
+                const jsonData = await response.json();
+
+                // データをページに表示
+                const contentDiv = document.getElementById('content');
+                contentDiv.innerHTML = ''; // 初期内容をクリア
+
+                // JSONデータを表示
+                jsonData.forEach(item => {
+                    const link = document.createElement('a');
+                    link.href = item.url;
+                    link.textContent = item.name;
+                    link.style.display = 'block'; // 各リンクを新しい行に配置
+                    link.style.margin = '10px 0'; // 適度な余白を追加
+                    contentDiv.appendChild(link);
+                });
+            } catch (error) {
+                console.error('エラー:', error);
+                const contentDiv = document.getElementById('content');
+                contentDiv.textContent = 'データの読み込みに失敗しました。';
+            }
+        }
+
+        // ページロード時にJSONを読み込む
+        window.onload = loadJsonFile;
+    </script>
+</body>
+</html>
+

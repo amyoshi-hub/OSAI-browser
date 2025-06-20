@@ -7,7 +7,7 @@ const P2P = () => {
   const [port, setPort] = useState("1234");
   const [toIp, setToIp] = useState("127.0.0.1");
   const [toPort, setToPort] = useState("1234");
-  const [filename, setFilename] = useState("example_file");
+  const [text, setSendText] = useState("example_file");
   const [viewText, setViewText] = useState("bulletin board");
   const [serverList, setServerList] = useState<string[]>([]);
 
@@ -22,16 +22,20 @@ const P2P = () => {
     }
   };
 
-  const sendFile = async () => {
+  const sendText = async () => {
   try {
     console.log(`Sending data from ${ip}:${port} to ${toIp}:${toPort}`);
-    const result = await invoke<string>("send_file", {
-      src_ip: ip,
-      src_port: parseInt(port),
-      dst_ip: toIp,
-      dst_port: parseInt(toPort),
-      filename,
+    console.log(typeof ip, typeof parseInt(port), typeof toIp, typeof parseInt(toPort));
+
+    const result = await invoke<string>("send_text", {
+      //src_ip: ip,
+      //src_port: parseInt(port),
+      //dst_ip: toIp,
+      //dst_port: parseInt(toPort),
+      text,
     });
+ 
+
     setViewText(result || "File sent successfully.");
   } catch (error) {
     console.error("File send error:", error);
@@ -109,10 +113,10 @@ const P2P = () => {
         </label>
         <label>
           File Name:
-          <input value={filename} onChange={(e) => setFilename(e.target.value)} placeholder="example_file" />
+          <input value={text} onChange={(e) => setSendText(e.target.value)} placeholder="hello" />
         </label>
       </div>
-      <button onClick={sendFile}>Send File</button>
+      <button onClick={sendText}>Send Text</button>
     </div>
   );
 };

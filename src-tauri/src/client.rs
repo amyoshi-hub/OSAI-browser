@@ -1,11 +1,10 @@
 use tauri::Emitter;
-use pnet::transport::{transport_channel, TransportChannelType, TransportProtocol};
 use pnet::packet::MutablePacket;
 use pnet::packet::udp::MutableUdpPacket;
-use pnet::packet::ip::IpNextHeaderProtocols;
 
 const END_SIG: u64 = 0xFFFFFFFFFFFFFFFF;
-const CHUNK_SIZE: usize = 1472 - 8 - 16 - 8 - 2 - 14;
+//const CHUNK_SIZE: usize = 1472 - 8 - 16 - 8 - 2 - 14;
+const CHUNK_SIZE: u64 = 1024;
 
 fn build_udp_packet<'a>(
     buffer: &'a mut [u8],
@@ -44,20 +43,24 @@ fn build_udp_packet<'a>(
 }
 
 #[tauri::command]
-pub async fn send_file(
-    src_ip: String,
-    src_port: u16,
-    dst_ip: String,
-    dst_port: u16,
-    filename: String,
+pub async fn send_text(
     app_handle: tauri::AppHandle,
+    //src_ip: String,
+    //src_port: u16,
+    //dst_ip: String,
+    //dst_port: u16,
+    text: String,
 ) -> Result<String, String> {
+    println!("i was call by tauri");
     use std::net::Ipv4Addr;
     use pnet::transport::{transport_channel, TransportChannelType::Layer4, TransportProtocol};
     use pnet::packet::ip::IpNextHeaderProtocols;
     use tokio::task::spawn;
-    use std::fs::File;
-    use std::io::Read;
+
+    let src_ip = "127.0.0.1";
+    let src_port: u16 = 1234;
+    let dst_ip = "127.0.0.1";
+    let dst_port: u16 = 1234;
 
     let src_ip: Ipv4Addr = src_ip.parse().map_err(|e| format!("Invalid src_ip: {}", e))?;
     let dst_ip: Ipv4Addr = dst_ip.parse().map_err(|e| format!("Invalid dst_ip: {}", e))?;
@@ -68,50 +71,39 @@ pub async fn send_file(
     let data_vec = [0u8; 14];         // 適宜設定
 
     // filenameをcloneしてmoveに持ち込む
-    let filename_clone = filename.clone();
+    let text_clone = text.clone();
 
-    spawn(async move {
+    //本当はasyncのほうが良いのかもしれないが
+    spawn( async move {
         let protocol = TransportProtocol::Ipv4(IpNextHeaderProtocols::Udp);
+        println!("create protocol");
         let (mut tx, _) = match transport_channel(4096, Layer4(protocol)) {
-            Ok((tx, rx)) => (tx, rx),
+            Ok((tx, rx)) => {
+                (tx, rx)
+            }
             Err(e) => {
+                println!("thread error");
                 let _ = app_handle.emit("send_file_status", format!("Failed to open transport channel: {}", e));
                 return;
             }
         };
 
-        let mut file = match File::open(&filename_clone) {
-            Ok(f) => f,
-            Err(e) => {
-                let _ = app_handle.emit("send_file_status", format!("Failed to open file: {}", e));
-                return;
-            }
-        };
-
-        let mut buffer = [0u8; 1024];
         let mut chunk_id = 0u32;
+        let data_chunk = text.as_bytes().chunks(CHUNK_SIZE.try_into().unwrap());
 
-        loop {
-            let read_bytes = match file.read(&mut buffer) {
-                Ok(n) => n,
-                Err(e) => {
-                    let _ = app_handle.emit("send_file_status", format!("Failed to read file: {}", e));
-                    return;
-                }
-            };
+        
 
-            if read_bytes == 0 {
+        for data_chunk in data_chunk{
+
+            if text.is_empty() {
                 break;
-            }
+            }    
 
             // chunkを8バイトの配列に格納（例としてu64をBEで）
             let chunk = (chunk_id as u64).to_be_bytes();
 
-            // 送信データ（ファイルの一部）
-            let data = &buffer[..read_bytes];
-
             // UDPペイロードサイズ計算
-            let payload_len = 16 + 8 + 2 + 14 + data.len();
+            let payload_len = session_id.len() + chunk.len() + format_signal.len() + data_vec.len() + data_chunk.len();
             let mut packet_buffer = vec![0u8; 8 + payload_len];  // UDPヘッダー8バイト + payload
 
             let mut packet = build_udp_packet(
@@ -122,8 +114,12 @@ pub async fn send_file(
                 &chunk,
                 &format_signal,
                 &data_vec,
-                data,
+                &data_chunk,
             );
+
+            println!("Sending packet: {:?}", packet);
+            println!("To destination: {}", dst_ip);
+
 
             if let Err(e) = tx.send_to(packet, std::net::IpAddr::V4(dst_ip)) {
                 let _ = app_handle.emit("send_file_status", format!("Failed to send chunk {}: {}", chunk_id, e));
@@ -151,5 +147,5 @@ pub async fn send_file(
         let _ = app_handle.emit("send_file_status", "All chunks sent".to_string());
     });
 
-    Ok(format!("Started sending file: {}", filename))
+    Ok(format!("Started sending text: {}", text_clone))
 }

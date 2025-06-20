@@ -1,8 +1,9 @@
 use tokio::net::UdpSocket;
 use tokio::task;
-//use tauri::{Builder, Manager};
 use tauri::Emitter;
-//use net_arc::{netConfig, UdpArc};
+
+mod server_signal;
+use server_signal::server_signal;
 
 #[tauri::command]
 pub async fn start_server(app_handle: tauri::AppHandle, ip: String, port: String) -> Result<String, String> {
@@ -29,16 +30,20 @@ pub async fn start_server(app_handle: tauri::AppHandle, ip: String, port: String
                 Ok((len, addr)) => {
                     match parse_packet(&buf[..len]) {
                         Some((session_id, chunk, format, data_vec, data)) => {
-                            let received_data = match &format {
-                                b"00" => String::from_utf8_lossy(&data).to_string(),
-                                b"01" => hex::encode(&data),
-                                _ => format!("unsupported format: {:x?}", format), // セミコロンを追加
+                            let received_data = match format {
+                                [0, 0] => String::from_utf8_lossy(&data).to_string(),
+                                [0, 1] => hex::encode(&data),
+                                [0xFF, 0xFF] => {
+                                    println!("found server!");
+                                    println!("Session_ID:{} IP:{}", session_id, addr);
+                                },
+                                _ => format!("unsupported format: {:x?}", format),
                             };
                             println!("session_id:{:x?}", session_id);
                             println!("chunk:{:x?}", chunk);
                             println!("format:{:x?}", format);
                             println!("data_vec:{:x?}", data_vec);
-                            println!("data:{:x?}", data.len());
+                            println!("data:{}", received_data);
 
                             if let Err(e) = app_handle.emit("udp_data_received", format!("{} from {}", received_data, addr)) {
                                 eprintln!("Failed to emit UDP data event: {}", e);
@@ -56,6 +61,8 @@ pub async fn start_server(app_handle: tauri::AppHandle, ip: String, port: String
             }
         }
     }); // `task::spawn` の閉じカッコを正しい位置に配置
+
+    server_signal(session_id, chunk, format, data_vec, data);
 
     Ok(format!("Server started successfully on {}", address)) // 正しく閉じる
 }

@@ -2,9 +2,9 @@
 use tokio::net::UdpSocket;
 use tokio::task;
 use tauri::Emitter;
-use rand::Rng; // session_id のランダム生成用
+//use rand::Rng; // session_id のランダム生成用
 
-use crate::client;
+//use crate::client;
 use crate::server_signal;
 
 // parse_packet も同じファイルに移動したと仮定

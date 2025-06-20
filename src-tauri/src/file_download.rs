@@ -1,8 +1,8 @@
-use tauri::{command, api::path::download_dir};
+use tauri::{command};
 use reqwest::Client;
 use std::path::PathBuf;
 use tokio::fs::File;
-use tokio::io::AsyncWriteExt; // AsyncWriteExt をインポート
+use tokio::io::AsyncWriteExt;
 
 #[command]
 pub async fn download_file(url: String, file_name: String) -> Result<String, String> {

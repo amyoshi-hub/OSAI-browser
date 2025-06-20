@@ -1,6 +1,7 @@
-// src/App.tsx (一部抜粋)
 import React, { useState } from "react";
-import { invoke } from "@tauri-apps/api/tauri"; // Tauriのinvokeをインポート
+import { invoke } from "@tauri-apps/api/core";
+
+import "./App.css";
 
 const worldSearch: React.FC = () => {
   const [downloadUrl, setDownloadUrl] = useState("");
@@ -22,8 +23,9 @@ const worldSearch: React.FC = () => {
 
   return (
     <div>
-      {/* ... 既存のコード ... */}
-      <h2>ファイルダウンロード</h2>
+    <a href="index.html">戻る</a> 
+
+      <p><h2>ファイルダウンロード</h2></p>
       <input
         type="text"
         value={downloadUrl}

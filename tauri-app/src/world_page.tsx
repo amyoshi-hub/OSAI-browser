@@ -1,8 +1,8 @@
-// src/WorldPage.tsx
-
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from "react-router-dom";
+import "./App.css";
 
-// JSONデータの型定義 (world_list.json の構造に合わせて調整してください)
+
 interface WorldItem {
     name: string;
     url: string;
@@ -15,6 +15,7 @@ const WorldPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     // ローディング状態を保持するためのState
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const loadJsonFile = async () => {
@@ -24,7 +25,6 @@ const WorldPage: React.FC = () => {
 
                 // Tauri環境でビルドする場合、`public` フォルダ直下に配置されているJSONファイルは
                 // そのままパスでアクセスできることが多いですが、環境によってはパスの調整が必要です。
-                // 例: const response = await fetch('/world_list.json');
                 const response = await fetch('world_list.json'); // 同一階層にある場合
 
                 if (!response.ok) {
@@ -46,12 +46,22 @@ const WorldPage: React.FC = () => {
         };
 
         loadJsonFile();
-    }, []); // 空の依存配列で、コンポーネントのマウント時に一度だけ実行
+    }, []); 
+
+      const loadWorldSearch = () => {
+          navigate("/world_search");
+      };
+      const WasmLoader = () => {
+          navigate("/wasm_loader");
+      };
+
 
     return (
         <div>
             {/* 戻るリンク */}
             <a href="index.html">戻る</a> {/* 必要に応じてReact RouterのLinkなどに変更 */}
+	    <button onClick={loadWorldSearch}>WORLD_Search</button>
+	    <button onClick={WasmLoader}>WORLD_IMPORT</button>
 
             <h2>ワールドリスト</h2>
             <div id="content">
@@ -63,7 +73,7 @@ const WorldPage: React.FC = () => {
                     worldList.length > 0 ? (
                         worldList.map((item, index) => (
                             <a
-                                key={index} // keyは必須です。実際のデータにユニークなIDがあればそちらを使うべきです。
+                                key={index} // keyは必須です。実際のデータにユニークなidがあればそちらを使うべきです。
                                 href={item.url}
                                 style={{ display: 'block', margin: '10px 0' }}
                             >
@@ -74,6 +84,7 @@ const WorldPage: React.FC = () => {
                         <p>表示するデータがありません。</p>
                     )
                 )}
+
             </div>
         </div>
     );

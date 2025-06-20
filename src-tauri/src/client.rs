@@ -6,7 +6,7 @@ const END_SIG: u64 = 0xFFFFFFFFFFFFFFFF;
 //const CHUNK_SIZE: usize = 1472 - 8 - 16 - 8 - 2 - 14;
 const CHUNK_SIZE: u64 = 1024;
 
-fn build_udp_packet<'a>(
+pub fn build_udp_packet<'a>(
     buffer: &'a mut [u8],
     src_port: u16,
     dst_port: u16,

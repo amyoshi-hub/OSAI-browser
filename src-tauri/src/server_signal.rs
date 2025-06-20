@@ -1,30 +1,23 @@
-// src/server_signal.rs
+use rand::Rng; // rand::Rng の機能を使うために必要
+use crate::client::build_udp_packet; // client モジュールの build_udp_packet 関数をインポート
 
-use rand::Rng; // session_id 生成用
-// build_packet は client モジュールにあると仮定。
-// client モジュールがなければ、このファイルを client.rs に統合するか、共通の util.rs などに移動。
-use crate::client::build_packet; // 例: crate::client::build_packet のようにパスを修正
-
-// サーバーアナウンスメントパケットを構築する関数
-// 構築したパケットのバイト数 (len) を返す
 pub fn build_server_announce_packet(
     buffer: &mut [u8],
     src_port: u16,
     dst_port: u16,
-    // session_id はこの関数内で生成する
-    // data_vec, data もこのシグナルに特化した内容にする
-) -> usize {
+) -> usize { // <--- 戻り値は `usize` のままにします。パケットの長さを返すため。
     let mut rng = rand::thread_rng();
-    let session_id: [u8; 16] = rng.gen(); // ランダムなセッションID
+    
+    let mut session_id: [u8; 16] = [0; 16]; // 16バイトの配列を初期化
+    rng.fill(&mut session_id); // rand::Rng::fill() を使って配列をランダムなバイトで埋める
+
     let chunk: [u8; 8] = [0; 8];          // シグナル用なので全て0でOK
     let format_signal: [u8; 2] = [0xFF, 0xFF]; // サーバー生存シグナル
     let data_vec: [u8; 14] = [0; 14];     // シグナル用なので全て0でOK
     let data: &[u8] = b"OSAI Server Online"; // 簡潔なメッセージ (UTF-8)
 
-    // build_packet を呼び出してパケットを構築し、その長さを返す
-    // build_packet 関数がパケットの長さを返すように設計されている前提
-    // もし build_packet が長さを返さないなら、自分で計算するか、build_packet の定義を見直す
-    build_packet(
+    // build_udp_packet を呼び出し、返された MutableUdpPacket から長さを取得して返す
+    let packet = build_udp_packet( // build_udp_packet の戻り値を受け取る
         buffer,
         src_port,
         dst_port,
@@ -33,5 +26,22 @@ pub fn build_server_announce_packet(
         &format_signal,
         &data_vec,
         data
-    )
+    );
+
+    // MutableUdpPacket から実際のパケットの長さを取得する
+    // pnet::packet::Packet トレイトを実装しているはずなので、`packet.packet().len()` で取得できるはずです。
+    // あるいは、内部バッファの長さ + UDPヘッダ長など、構築ロジックによって変わります。
+    // 通常、`MutableUdpPacket` 自体が、そのヘッダとペイロードを含んだ「有効なパケットの長さ」を知っているはずです。
+    // ここでは `get_size()` や `packet().len()` のようなメソッドを仮定します。
+    // pnet::packet::udp::MutableUdpPacket のドキュメントを確認してください。
+    // 簡単な方法は、UDPヘッダー長(8バイト)とペイロードの合計長を計算することです。
+    // build_udp_packet内で `packet.set_length((8 + payload_len) as u16);` を呼んでいるので、
+    // ここではその `(8 + session_id.len() + chunk.len() + format_signal.len() + data_vec.len() + data.len())` を返せば良いです。
+    
+    // または、MutableUdpPacket が提供する `get_total_length()` や `packet().len()` など
+    // 正確な方法は、pnetのドキュメントで `MutableUdpPacket` のメソッドを確認してください。
+    // 例えば、`packet.packet().len()` や `packet.packet_size()` のようなもの。
+    // もし単純に `set_length` で設定した値がそのままUDPパケットの全長になるなら、
+    // 以下のように計算で返せます。
+    (8 + session_id.len() + chunk.len() + format_signal.len() + data_vec.len() + data.len()) as usize
 }

@@ -39,7 +39,7 @@ const App: React.FC = () => {
   };
 
   const loadWorldPage = () => {
-    setIframeSrc("world_page.html");
+	  navigate("/world_page");
   };
 
   return (

@@ -1,6 +1,7 @@
 use tauri::{Builder};
-mod server;
-mod client;
+pub mod server;
+pub mod server_signal;
+pub mod client;
 use server::start_server;
 use client::send_text;
 

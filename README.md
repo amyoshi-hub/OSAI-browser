@@ -12,3 +12,5 @@ iframeからno iframeにすることでurlからgoogleなどに飛べる。ロ�
 TODO:動機、技術スタック、install方法などを書く
 <p>
 windowsは別途のパケット監視ドライバを入れないと動かないかも
+<p>
+今のところp2p機能は管理者権限がいる

@@ -6,7 +6,7 @@ pub fn build_server_announce_packet(
     src_port: u16,
     dst_port: u16,
 ) -> usize { // <--- 戻り値は `usize` のままにします。パケットの長さを返すため。
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     
     let mut session_id: [u8; 16] = [0; 16]; // 16バイトの配列を初期化
     rng.fill(&mut session_id); // rand::Rng::fill() を使って配列をランダムなバイトで埋める

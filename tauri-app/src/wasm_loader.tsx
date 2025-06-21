@@ -49,7 +49,7 @@ const WasmLoaderPage: React.FC = () => {
 
         } catch (error) {
             console.error("ワールド追加に失敗しました:", error);
-            setErrorMessage(`ワールドの追加に失敗しました: ${error.toString()}`); // エラーオブジェクトを文字列に変換
+            setErrorMessage(`ワールドの追加に失敗しました`);
             setStatusMessage('処理に失敗しました。');
         }
     }, [navigate]); // navigateを依存配列に追加

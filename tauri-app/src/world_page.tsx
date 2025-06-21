@@ -1,16 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
+import { invoke } from "@tauri-apps/api/core"; // invoke をインポート
 import "./App.css";
 
-
-interface WorldItem {
+// RustのWorldEntry構造体と対応する型定義
+interface WorldEntry {
+    id: string; // RustのWorldEntryに合わせてidを追加
     name: string;
-    url: string;
+    entry_point_path: string; // Rustのentry_point_pathに合わせる
+}
+
+// RustのWorldList構造体（内部にworlds配列を持つ）と対応する型定義
+interface WorldListResponse {
+    worlds: WorldEntry[];
 }
 
 const WorldPage: React.FC = () => {
-    // データを保持するためのState
-    const [worldList, setWorldList] = useState<WorldItem[]>([]);
+    // データを保持するためのState。型を WorldEntry[] に変更
+    const [worldList, setWorldList] = useState<WorldEntry[]>([]);
     // エラーメッセージを保持するためのState
     const [error, setError] = useState<string | null>(null);
     // ローディング状態を保持するためのState
@@ -18,25 +25,26 @@ const WorldPage: React.FC = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const loadJsonFile = async () => {
+        const loadWorldList = async () => {
             try {
                 setIsLoading(true); // ロード開始
                 setError(null);    // エラーをリセット
 
-                // Tauri環境でビルドする場合、`public` フォルダ直下に配置されているJSONファイルは
-                // そのままパスでアクセスできることが多いですが、環境によってはパスの調整が必要です。
-                const response = await fetch('world_list.json'); // 同一階層にある場合
+                // Rustコマンドを呼び出してワールドリストを取得
+                // invokeの結果は直接 WorldListResponse 型のデータ
+                const response: WorldListResponse = await invoke("get_world_list");
+                
+                // Rustから受け取ったデータを直接セット
+                // ここで response.worlds をセットします
+                setWorldList(response.worlds);
 
-                if (!response.ok) {
-                    throw new Error(`HTTPエラー: ${response.status} ${response.statusText}`);
-                }
-
-                const jsonData: WorldItem[] = await response.json();
-                setWorldList(jsonData); // データをStateにセット
             } catch (err) {
-                console.error('エラー:', err);
+                console.error('ワールドリストの読み込みエラー:', err);
                 if (err instanceof Error) {
                     setError(`データの読み込みに失敗しました: ${err.message}`);
+                } else if (typeof err === 'string') {
+                    // Rustから返されるエラーは通常文字列なのでこれを考慮
+                    setError(`データの読み込みに失敗しました: ${err}`);
                 } else {
                     setError('データの読み込みに失敗しました。不明なエラー。');
                 }
@@ -45,23 +53,45 @@ const WorldPage: React.FC = () => {
             }
         };
 
-        loadJsonFile();
+        loadWorldList();
     }, []); 
 
-      const loadWorldSearch = () => {
-          navigate("/world_search");
-      };
-      const WasmLoader = () => {
-          navigate("/wasm_loader");
-      };
+    const loadWorldSearch = () => {
+        navigate("/world_search");
+    };
+    const WasmLoader = () => {
+        navigate("/wasm_loader");
+    };
 
+    // ワールドをクリックしたときのハンドラ
+        const handleWorldClick = async (worldId: string, worldName: string, entryPointPath: string) => {
+        console.log(`ワールド起動試行: ID=${worldId}, Name=${worldName}, Entry=${entryPointPath}`);
+        try {
+            await invoke('open_world', {
+                entryPointPath: entryPointPath,
+                worldName: worldName,
+            });
+            console.log("ゲームウィンドウが正常に開かれました。");
+            // navigate('/'); // 例: メインメニューに戻る
+        } catch (error) {
+            console.error("ゲーム起動に失敗しました:", error);
+            // エラー表示などのフィードバック
+            if (error instanceof Error) {
+                alert(`ゲームの起動に失敗しました: ${error.message}`);
+            } else if (typeof error === 'string') {
+                alert(`ゲームの起動に失敗しました: ${error}`);
+            } else {
+                alert('ゲームの起動に失敗しました。不明なエラー。');
+            }
+        }
+    };
 
     return (
         <div>
             {/* 戻るリンク */}
-            <a href="index.html">戻る</a> {/* 必要に応じてReact RouterのLinkなどに変更 */}
-	    <button onClick={loadWorldSearch}>WORLD_Search</button>
-	    <button onClick={WasmLoader}>WORLD_IMPORT</button>
+            <a href="/">戻る</a> {/* メニューに戻る */}
+            <button onClick={loadWorldSearch}>WORLD_Search</button>
+            <button onClick={WasmLoader}>WORLD_IMPORT</button>
 
             <h2>ワールドリスト</h2>
             <div id="content">
@@ -71,14 +101,14 @@ const WorldPage: React.FC = () => {
                 {/* データが表示される部分 */}
                 {!isLoading && !error && (
                     worldList.length > 0 ? (
-                        worldList.map((item, index) => (
-                            <a
-                                key={index} // keyは必須です。実際のデータにユニークなidがあればそちらを使うべきです。
-                                href={item.url}
-                                style={{ display: 'block', margin: '10px 0' }}
+                        worldList.map((item) => (
+                            <button
+                                key={item.id} // keyはWorldEntryのidプロパティを使用
+                                onClick={() => handleWorldClick(item.id, item.name, item.entry_point_path)}
+                                style={{ display: 'block', margin: '10px 0', padding: '10px', border: '1px solid #ccc', borderRadius: '5px', cursor: 'pointer', backgroundColor: '#f9f9f9', width: 'fit-content' }}
                             >
                                 {item.name}
-                            </a>
+                            </button>
                         ))
                     ) : (
                         <p>表示するデータがありません。</p>

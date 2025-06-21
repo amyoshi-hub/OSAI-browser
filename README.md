@@ -12,18 +12,28 @@ Key Features:
 
 Technical Details:
 
-    Technology Stack: (TODO: write tecnorogy stack)
-    Installation: (TODO: write how to install)
+    Technology Stack: rust, tauri, (in p2o):pnet
+    Installation: exe file only
+
+rust:
+    in root: cargo tauri build
 
 Current Status:
 
     P2P functionality is implemented.
-    (TODO: write motive)
+    (TODO: later)
 
 Important Notes (Windows):
 
     On Windows, a separate packet monitoring driver may be required.
     Currently, P2P functionality requires administrator privileges.
+p2p function:
+    ->need sudo permission<-
+file drag install:
+    please include "index.html"
+
+$comment:
+    currently app lunguege is japanease sorry!
 
 p2pの機能を持ったブラウザである
 <p>

@@ -2,12 +2,14 @@ import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
 
+//from ip use read local ip
+//
 const P2P = () => {
   const [ip, setIp] = useState("127.0.0.1");
   const [port, setPort] = useState("1234");
   const [toIp, setToIp] = useState("127.0.0.1");
   const [toPort, setToPort] = useState("1234");
-  const [text, setSendText] = useState("example_file");
+  const [text, setSendText] = useState("text");
   const [viewText, setViewText] = useState("bulletin board");
   const [serverList, setServerList] = useState<string[]>([]);
 
@@ -36,10 +38,10 @@ const P2P = () => {
     });
  
 
-    setViewText(result || "File sent successfully.");
+    setViewText(result || "Text sent successfully.");
   } catch (error) {
-    console.error("File send error:", error);
-    setViewText(`File send failed: ${error}`);
+    console.error("Text send error:", error);
+    setViewText(`Text send failed: ${error}`);
   }
   };
  

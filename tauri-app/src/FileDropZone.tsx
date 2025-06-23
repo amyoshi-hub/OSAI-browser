@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getCurrentWebview } from '@tauri-apps/api/webview'; // 新しいAPIをインポート
+import { getCurrentWebview } from '@tauri-apps/api/webview'; 
 
 interface DragDropPayload {
   type: 'over' | 'drop' | 'cancel' | 'enter' | 'leave';
@@ -19,9 +19,7 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({ filePath, errorMessage, onF
   useEffect(() => {
     const setupDragDropListener = async () => {
       // getCurrentWebview().onDragDropEvent の引数の型を明示的に指定
-      // これにより、TypeScriptが正しい型で推論するようになります
       const unlisten = await getCurrentWebview().onDragDropEvent((event: { payload: DragDropPayload }) => {
-        // payloadの型が DragDropPayload であることを TypeScript に伝える
         const payload = event.payload;
 
         if (payload.type === 'over') {
@@ -30,11 +28,10 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({ filePath, errorMessage, onF
         } else if (payload.type === 'drop') {
           setIsHovered(false);
           console.log('File Dropped (via onDragDropEvent)', payload.paths);
-          // paths が存在することを確認してから onFileDrop を呼び出す
           if (payload.paths) {
             onFileDrop(payload.paths);
           }
-        } else if (payload.type === 'cancel') { // ここはこれでOK
+        } else if (payload.type === 'cancel') { 
           setIsHovered(false);
           console.log('File Drop Cancelled (via onDragDropEvent)');
         }
@@ -53,7 +50,7 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({ filePath, errorMessage, onF
         cleanupFunction();
       }
     };
-  }, [onFileDrop]); // onFileDrop は変わらないことを想定
+  }, [onFileDrop]);
 
   return (
     <div
@@ -65,7 +62,7 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({ filePath, errorMessage, onF
         {filePath ? (
           <p style={{color: "black"}}>{filePath}</p>
         ) : (
-          <p style={{color: "black"}}>ここにファイルをドラッグ＆ドロップしてください</p>
+          <p style={{color: "black"}}>File Drop Here</p>
         )}
         {errorMessage && (
           <p style={{color: "black"}} className="text-red-500 text-center pt-2">{errorMessage}</p>

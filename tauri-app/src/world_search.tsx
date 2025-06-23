@@ -9,15 +9,15 @@ const worldSearch: React.FC = () => {
   const [downloadMessage, setDownloadMessage] = useState("");
 
   const handleDownload = async () => {
-    setDownloadMessage("ダウンロード中...");
+    setDownloadMessage("Downloading...");
     try {
-      const result = await invoke("download_file", { // Rustのコマンドを呼び出す
+      const result = await invoke("download_file", {
         url: downloadUrl,
         fileName: downloadFileName,
       });
-      setDownloadMessage(result as string); // Rustからの成功メッセージ
+      setDownloadMessage(result as string);
     } catch (error) {
-      setDownloadMessage(`ダウンロードエラー: ${error}`); // Rustからのエラーメッセージ
+      setDownloadMessage(`Download Error: ${error}`); 
     }
   };
 
@@ -25,20 +25,20 @@ const worldSearch: React.FC = () => {
     <div>
     <a href="index.html">戻る</a> 
 
-      <p><h2>ファイルダウンロード</h2></p>
+      <p><h2>File Download</h2></p>
       <input
         type="text"
         value={downloadUrl}
         onChange={(e) => setDownloadUrl(e.target.value)}
-        placeholder="ダウンロードURLを入力 (例: https://example.com/file.wasm)"
+        placeholder="Input Download URL"
       />
       <input
         type="text"
         value={downloadFileName}
         onChange={(e) => setDownloadFileName(e.target.value)}
-        placeholder="保存ファイル名 (例: my_wasm_app.wasm)"
+        placeholder="Save File Name"
       />
-      <button onClick={handleDownload}>ダウンロード開始</button>
+      <button onClick={handleDownload}>Download Start</button>
       <p>{downloadMessage}</p>
     </div>
   );

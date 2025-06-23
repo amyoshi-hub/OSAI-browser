@@ -6,21 +6,21 @@ import { useNavigate } from 'react-router-dom'; // Assuming you use react-router
 
 const WasmLoaderPage: React.FC = () => {
     const [currentFilePath, setCurrentFilePath] = useState<string | null>(null);
-    const [statusMessage, setStatusMessage] = useState<string>('GodotのWebエクスポート（ZIPまたはフォルダ内のHTMLファイル）をここにドラッグ＆ドロップしてください。');
+    const [statusMessage, setStatusMessage] = useState<string>('（zip or folder）Drag here');
     const [errorMessage, setErrorMessage] = useState<string | null>(null); // エラーメッセージ用
 
     const navigate = useNavigate(); // For navigation after success
 
     const handleFileDropped = useCallback(async (paths: string[]) => {
         if (paths.length === 0) {
-            setErrorMessage('ファイルがドロップされませんでした。');
+            setErrorMessage('file was not droped');
             setCurrentFilePath(null);
             return;
         }
 
         const droppedFilePath = paths[0]; // ドロップされた最初のファイルパスを取得
         setCurrentFilePath(droppedFilePath);
-        setStatusMessage('ファイルを処理中...');
+        setStatusMessage('File Loading..');
         setErrorMessage(null); // エラーをリセット
 
         // ファイル名からワールド名を仮決定
@@ -29,7 +29,7 @@ const WasmLoaderPage: React.FC = () => {
         let defaultWorldName = fileName ? fileName.split('.')[0] : 'Unnamed_World';
 
         // ユーザーにワールド名を入力してもらう
-        const worldName = prompt('このワールドの名前を入力してください:', defaultWorldName) || defaultWorldName;
+        const worldName = prompt('Input This World Name:', defaultWorldName) || defaultWorldName;
 
         try {
             // Rustコマンド 'process_and_add_world' を呼び出す
@@ -39,18 +39,18 @@ const WasmLoaderPage: React.FC = () => {
                 worldName: worldName,
             });
 
-            setStatusMessage(`'${worldName}' をワールドとして正常に追加しました！エントリポイント: ${entryPointPath}`);
+            setStatusMessage(`'${worldName}' was added success！entry point: ${entryPointPath}`);
             console.log('World added successfully. Entry point:', entryPointPath);
 
             // 成功後、ワールドリストページなどへ自動遷移するのも良いでしょう
             // 例: setTimeout(() => navigate('/worlds'), 2000); // 2秒後に/worldsへ
-            alert(`'${worldName}' をワールドとして正常に追加しました。\nメニューに戻り、ワールドリストから実行してください。`);
+            alert(`'${worldName}' was added success!\n Back to manu, and execute by World List`);
             navigate('/'); // メニューに戻るか、ワールドリストページに遷移
 
         } catch (error) {
-            console.error("ワールド追加に失敗しました:", error);
-            setErrorMessage(`ワールドの追加に失敗しました`);
-            setStatusMessage('処理に失敗しました。');
+            console.error("World added was success:", error);
+            setErrorMessage(`World added was failed`);
+            setStatusMessage('failed to process');
         }
     }, [navigate]); // navigateを依存配列に追加
 
@@ -66,7 +66,7 @@ const WasmLoaderPage: React.FC = () => {
             }}
         >
             <a href="/">Back to Menu</a> {/* トップページへのリンク */}
-            <h2 style={{ color: "black" }}>新しいワールドを登録</h2>
+            <h2 style={{ color: "black" }}>Registration New World</h2>
 
             <FileDropZone
                 filePath={currentFilePath}
@@ -76,11 +76,11 @@ const WasmLoaderPage: React.FC = () => {
 
             <p style={{ marginTop: '20px', color: 'black' }}>{statusMessage}</p>
             {errorMessage && (
-                <p style={{ color: 'red', fontWeight: 'bold' }}>エラー: {errorMessage}</p>
+                <p style={{ color: 'red', fontWeight: 'bold' }}>Error: {errorMessage}</p>
             )}
 
             {currentFilePath && (
-                <p style={{ marginTop: '10px', color: 'black' }}>ドロップされたファイル: {currentFilePath}</p>
+                <p style={{ marginTop: '10px', color: 'black' }}>Droped file: {currentFilePath}</p>
             )}
         </div>
     );

@@ -6,7 +6,7 @@ const App: React.FC = () => {
   const [url, setUrl] = useState("");
   const [useIframe, setUseIframe] = useState(true);
   const [iframeSrc, setIframeSrc] = useState("");
-  const [instructionText, setInstructionText] = useState("現在Iframe モードです URLを挿入して下さい");
+  const [instructionText, setInstructionText] = useState("Iframe MODE Please input URL");
 
   const navigate = useNavigate();
 
@@ -31,7 +31,7 @@ const App: React.FC = () => {
   const switchMode = () => {
     const newMode = !useIframe;
     setUseIframe(newMode);
-    setInstructionText(`現在: ${newMode ? "Iframe モード" : "NO Iframe モード"}です`);
+    setInstructionText(`NOW: ${newMode ? "Iframe MODE" : "NO Iframe MODE"}`);
   };
 
   const loadP2PPage = () => {
@@ -50,7 +50,7 @@ const App: React.FC = () => {
           value={url}
           onChange={handleInputChange}
           onKeyDown={handleInputKeyDown}
-          placeholder="URLを入力してください"
+          placeholder="INPUT URL"
         />
         <button onClick={switchMode}>Switch Mode</button>
         <button onClick={loadP2PPage}>P2P</button>

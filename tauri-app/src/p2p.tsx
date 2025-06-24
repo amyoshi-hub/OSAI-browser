@@ -3,7 +3,6 @@ import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
 
 //from ip use read local ip
-//
 const P2P = () => {
   const [ip, setIp] = useState("127.0.0.1");
   const [port, setPort] = useState("1234");
@@ -13,10 +12,18 @@ const P2P = () => {
   const [viewText, setViewText] = useState("bulletin board");
   const [serverList, setServerList] = useState<string[]>([]);
 
+  const [useUdpProtocol, setUseUdpProtocol] = useState(true);
+
   const startServer = async () => {
     try {
-      console.log(`Starting server at ${ip}:${port}`);
-      const result = await invoke<string>("start_server", { ip, port });
+      let result: string;
+      if (useUdpProtocol){
+      	console.log(`Starting server at ${ip}:${port}`);
+      	result = await invoke<string>("start_server", { ip, port });
+      }else{
+      	console.log(`Starting websocket server at ${ip}:${port}`);
+	result = await invoke<string>("start_websocket_server", {ip, port});
+      }
       setViewText(result || "Server started successfully.");
     } catch (error) {
       console.error("Server start error:", error);
@@ -62,6 +69,13 @@ const P2P = () => {
   return (
     <div>
       <a href="index.html">Back to Menu</a>
+      <p>
+      use_UDP<input 
+      type="checkbox" 
+      checked={useUdpProtocol}
+      onChange={(e) => setUseUdpProtocol(e.target.checked)}
+      />
+      </p>
       <h2>Setup as Server</h2>
       <div>
         <label>
@@ -82,7 +96,7 @@ const P2P = () => {
         ) : (
           <ul>
             {serverList.map((server, index) => (
-              <li key={index}>{server}</li>
+              <button key={index}>{server}</button>
             ))}
           </ul>
         )}
@@ -114,11 +128,13 @@ const P2P = () => {
           <input value={toPort} onChange={(e) => setToPort(e.target.value)} placeholder="1234" />
         </label>
         <label>
-          File Name:
+	<p>
+          <h2>Send Text Content:</h2>
+	</p>
           <input value={text} onChange={(e) => setSendText(e.target.value)} placeholder="hello" />
+      	  <button onClick={sendText}>Send Text</button>
         </label>
       </div>
-      <button onClick={sendText}>Send Text</button>
     </div>
   );
 };

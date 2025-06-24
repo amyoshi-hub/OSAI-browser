@@ -1,47 +1,51 @@
-import React, { useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
+const WORLD_SEARCH = () => {
 
-import "./App.css";
+function downloadViaAnchor(url: string, filename: string): void{
+	const anchor = document.createElement('a');	
+	anchor.href = url;
+	anchor.download = filename;
 
-const worldSearch: React.FC = () => {
-  const [downloadUrl, setDownloadUrl] = useState("");
-  const [downloadFileName, setDownloadFileName] = useState("downloaded_file");
-  const [downloadMessage, setDownloadMessage] = useState("");
+	document.body.appendChild(anchor);
+	anchor.click();
 
-  const handleDownload = async () => {
-    setDownloadMessage("Downloading...");
-    try {
-      const result = await invoke("download_file", {
-        url: downloadUrl,
-        fileName: downloadFileName,
-      });
-      setDownloadMessage(result as string);
-    } catch (error) {
-      setDownloadMessage(`Download Error: ${error}`); 
-    }
-  };
+	document.body.removeChild(anchor);
+	console.log(`Donwloading: ${filename} from ${url}`);
+}
 
-  return (
-    <div>
-    <a href="index.html">戻る</a> 
+let intervalId: number | undefined;
+let imageCounter = 0;
 
-      <p><h2>File Download</h2></p>
-      <input
-        type="text"
-        value={downloadUrl}
-        onChange={(e) => setDownloadUrl(e.target.value)}
-        placeholder="Input Download URL"
-      />
-      <input
-        type="text"
-        value={downloadFileName}
-        onChange={(e) => setDownloadFileName(e.target.value)}
-        placeholder="Save File Name"
-      />
-      <button onClick={handleDownload}>Download Start</button>
-      <p>{downloadMessage}</p>
-    </div>
-  );
-};
+function startFeedDownload(peerIp: string, peerPort: string){
+	if (intervalId) return;
 
-export default worldSearch;
+	intervalId = setInterval(() => {
+		imageCounter++;	
+		const imageUrl = `http://${peerIp}:${peerPort}`;
+		const filename = `download.png`;
+
+		downloadViaAnchor(imageUrl, filename);
+	
+	}, 1000);
+}
+
+function stopLiveFeedDownload(){
+	if (intervalId) {
+		clearInterval(intervalId);	
+		intervalId = undefined;
+		console.log("down load stop");
+	}
+}
+
+	return (
+		<div>	
+		<button onClick={() => startFeedDownload("127.0.0.1", "8080")}>
+			Start Live Feed
+		</button>
+		<button onClick={stopLiveFeedDownload}>
+			stop Live Feed
+		</button>
+		</div>	
+
+	)
+}
+export default WORLD_SEARCH;

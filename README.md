@@ -52,3 +52,4 @@ TODO2:windowsだとfileのdragがおかしいので修正するか、<input type
 windowsは別途のパケット監視ドライバを入れないと動かないかも
 <p>
 今のところp2p機能は管理者権限がいる
+

@@ -55,6 +55,7 @@ const App: React.FC = () => {
         <button onClick={switchMode}>Switch Mode</button>
         <button onClick={loadP2PPage}>P2P</button>
         <button onClick={loadWorldPage}>WORLD_SELECT</button>
+        <button onClick={loadWorldPage}>SECURITY</button>
       </div>
       <p id="instruct_text">{instructionText}</p>
       {useIframe && (

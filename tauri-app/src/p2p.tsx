@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { useNavigate } from "react-router-dom";
 import "./App.css";
 
 //from ip use read local ip
@@ -13,6 +14,8 @@ const P2P = () => {
   const [serverList, setServerList] = useState<string[]>([]);
 
   const [useUdpProtocol, setUseUdpProtocol] = useState(true);
+  
+  const navigate = useNavigate();
 
   const startServer = async () => {
     try {
@@ -62,6 +65,14 @@ const P2P = () => {
     }
   };
 
+  const move_share = async () => {
+ 	try {
+		navigate("/share");	
+	}catch(error){
+		console.log(`move_error${error}`);
+	} 
+  };
+
   const addServer = (server: string) => {
     setServerList((prev) => [...prev, server]);
   };
@@ -96,7 +107,7 @@ const P2P = () => {
         ) : (
           <ul>
             {serverList.map((server, index) => (
-              <button key={index}>{server}</button>
+              <button key={index} onClick={move_share}>{server}</button>
             ))}
           </ul>
         )}

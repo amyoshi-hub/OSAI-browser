@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useNavigate } from "react-router-dom";
+import { listen } from "@tauri-apps/api/event";
 import "./App.css";
 
 //from ip use read local ip
@@ -76,6 +77,18 @@ const P2P = () => {
   const addServer = (server: string) => {
     setServerList((prev) => [...prev, server]);
   };
+
+    useEffect(() => {
+    const unlisten = listen("add_server", (event: { payload: {addr: string; port: string}}) => {
+      const { addr, port } = event.payload as { addr: string; port: string };
+      console.log(`新しいサーバー: ${addr}:${port}`);
+      setServerList((prev) => [...prev, `${addr}:${port}`]);
+    });
+
+    return () => {
+      unlisten.then((fn) => fn());
+    };
+  }, []);
 
   return (
     <div>

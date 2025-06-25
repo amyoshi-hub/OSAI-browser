@@ -2,9 +2,16 @@
 use tokio::net::UdpSocket;
 use tokio::task;
 use tauri::Emitter;
+use serde::Serialize;
 //use rand::Rng; // session_id のランダム生成用
 
 use crate::server_signal;
+
+#[derive(Serialize, Clone)]
+struct ServerInfo {
+    addr: String,
+    port: String,
+}
 
 // parse_packet も同じファイルに移動したと仮定
 fn parse_packet(payload: &[u8]) -> Option<([u8; 16], [u8; 8], [u8; 2], [u8; 14], Vec<u8>)> {
@@ -23,7 +30,8 @@ fn parse_packet(payload: &[u8]) -> Option<([u8; 16], [u8; 8], [u8; 2], [u8; 14],
 
 #[tauri::command]
 pub async fn start_server(app_handle: tauri::AppHandle, ip: String, port: String) -> Result<String, String> {
-    let address = format!("{}:{}", ip, port);
+    //let address = format!("{}:{}", ip, port);
+    let address = format!("0.0.0.0:{}", port);
     println!("Attempting to bind UDP server to: {}", address);
 
     let socket = match UdpSocket::bind(&address).await {
@@ -84,8 +92,17 @@ pub async fn start_server(app_handle: tauri::AppHandle, ip: String, port: String
                                 [0xFF, 0xFF] => {
                                     println!("--- Server Discovery Signal Received ---");
                                     println!("  Discovered Server IP: {}", addr); // 送信元IPアドレスを表示
+                                    println!("  Discovered Server PORT: {}", port);
                                     println!("  Session ID: {:x?}", session_id); // シグナルを送ってきたセッションIDも確認用に表示
                                     println!("  Data Vec (for this signal, might be all zeros/FFs): {:x?}", data_vec); // data_vecも確認用に表示
+                                    let server_info = ServerInfo {
+                                        addr: addr.to_string(),
+                                        port: port.to_string(),
+                                    }; 
+
+                                    if let Err (e) = app_handle.emit("add_server", server_info){
+                                        eprintln!("Failed to emit addr event {}", e);
+                                    }
                                     
                                     if let Ok(msg) = String::from_utf8(data_payload.to_vec()) {
                                         println!("  Signal Message: {}", msg);

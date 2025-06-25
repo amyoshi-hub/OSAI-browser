@@ -27,14 +27,25 @@ const Share: React.FC = () => {
   };
 
   const requestFile = async (fileName: string) => {
-    try {
-      await invoke("request_file", { fileName });
-      console.log(`Requested file: ${fileName}`);
-    } catch (e) {
-      console.log("file request failed", e);
-    }
-  };
+  try {
+    console.log(`Requesting file: ${fileName}`);
+    const fileContent: Uint8Array = await invoke("request_file", { fileName });
 
+    const blob = new Blob([fileContent], { type: "application/octet-stream" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    a.click();
+
+    URL.revokeObjectURL(url);
+    console.log(`File ${fileName} downloaded successfully.`);
+  } catch (error) {
+    console.error(`Failed to download file: ${fileName}`, error);
+  }
+  };
+  
   return (
     <div>
       <h1>HTTP File Server</h1>

@@ -15,7 +15,7 @@ use file_copy::{get_world_list, open_world};
 use websocket::start_websocket_server;
 use file_server::get_file_list;
 use file_read::read_file_content;
-use http_server::{http_server, open_url_window, fetch_file_list};
+use http_server::{http_server, open_url_window, fetch_file_list, request_file};
 use http_server::FileList;
 
 
@@ -39,6 +39,7 @@ async fn main() {
             http_server,
             open_url_window,
             fetch_file_list,
+            request_file,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

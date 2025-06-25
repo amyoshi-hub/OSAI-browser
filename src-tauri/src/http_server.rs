@@ -5,7 +5,8 @@ use tauri::{WebviewUrl};
 use tauri::webview::WebviewWindowBuilder;
 use reqwest;
 use serde::Deserialize;
-//use tower_http::follow_redirect::policy::PolicyExt;
+use std::fs;
+use std::path::Path;
 
 async fn hello(name: String) -> Result<impl warp::Reply, Infallible> {
     Ok(format!("hello {}!", name))
@@ -56,3 +57,26 @@ pub async fn fetch_file_list(url: String) -> Result<Vec<String>, String> {
 
     Ok(file_list.files)
 }
+
+#[tauri::command]
+pub async fn request_file(file_name: String) -> Result<Vec<u8>, String> {
+    let file_url = format!("http://127.0.0.1:1234/{}", file_name);
+
+    // HTTP GET リクエストを送信
+    let response = reqwest::get(&file_url)
+        .await
+        .map_err(|e| format!("HTTP リクエスト失敗: {}", e))?;
+
+    // ステータスコードを確認
+    if !response.status().is_success() {
+        return Err(format!("HTTP エラー: {}", response.status()));
+    }
+
+    // バイナリデータを取得
+    response
+        .bytes()
+        .await
+        .map(|bytes| bytes.to_vec())
+        .map_err(|e| format!("レスポンス読み込み失敗: {}", e))
+}
+

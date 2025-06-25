@@ -4,7 +4,6 @@ use tokio::task;
 use tauri::Emitter;
 //use rand::Rng; // session_id のランダム生成用
 
-//use crate::client;
 use crate::server_signal;
 
 // parse_packet も同じファイルに移動したと仮定
@@ -88,7 +87,6 @@ pub async fn start_server(app_handle: tauri::AppHandle, ip: String, port: String
                                     println!("  Session ID: {:x?}", session_id); // シグナルを送ってきたセッションIDも確認用に表示
                                     println!("  Data Vec (for this signal, might be all zeros/FFs): {:x?}", data_vec); // data_vecも確認用に表示
                                     
-                                    // シグナルパケットの data_payload に含まれるメッセージを表示
                                     if let Ok(msg) = String::from_utf8(data_payload.to_vec()) {
                                         println!("  Signal Message: {}", msg);
                                         received_data_display = format!("Server Discovered: {} ({})", addr, msg);
@@ -102,8 +100,6 @@ pub async fn start_server(app_handle: tauri::AppHandle, ip: String, port: String
                                 },
                             };
                             
-                            // 各フィールドのログ出力は、display 変数に集約したため不要になる可能性あり
-                            // 例えば `received_data_display` だけ emit するなら、これらはデバッグ時にだけ有効化する
                             println!("session_id:{:x?}", session_id);
                             println!("chunk:{:x?}", chunk);
                             println!("format:{:x?}", format);
@@ -125,7 +121,7 @@ pub async fn start_server(app_handle: tauri::AppHandle, ip: String, port: String
                 }
             }
         }
-    }); // `task::spawn` の閉じカッコ
+    });
 
     Ok(format!("Server started successfully on {}", address))
 }

@@ -1,5 +1,5 @@
 use std::convert::Infallible;
-use warp::Filter;
+//use warp::Filter;
 use tauri::AppHandle;
 use tauri::{WebviewUrl};
 use tauri::webview::WebviewWindowBuilder;
@@ -7,6 +7,7 @@ use reqwest;
 use serde::Deserialize;
 use std::fs;
 use std::path::Path;
+use base64;
 
 async fn hello(name: String) -> Result<impl warp::Reply, Infallible> {
     Ok(format!("hello {}!", name))
@@ -59,8 +60,8 @@ pub async fn fetch_file_list(url: String) -> Result<Vec<String>, String> {
 }
 
 #[tauri::command]
-pub async fn request_file(file_name: String) -> Result<Vec<u8>, String> {
-    let file_url = format!("http://127.0.0.1:1234/{}", file_name);
+pub async fn request_file(file_name: String, ip: String) -> Result<String, String> {
+    let file_url = format!("http://{}:8080/share/{}", ip, file_name);
 
     // HTTP GET リクエストを送信
     let response = reqwest::get(&file_url)
@@ -73,10 +74,9 @@ pub async fn request_file(file_name: String) -> Result<Vec<u8>, String> {
     }
 
     // バイナリデータを取得
-    response
-        .bytes()
-        .await
-        .map(|bytes| bytes.to_vec())
-        .map_err(|e| format!("レスポンス読み込み失敗: {}", e))
+    //let bytes = response.bytes().await.map(|bytes| bytes.to_vec()).map_err(|e| format!("レスポンス読み込み失敗: {}", e));
+    let bytes = response.bytes().await.map_err(|e| format!("レスポンス読み込み失敗: {}", e))?;
+    let base64_encoded = base64::encode(&bytes);
+    Ok(base64_encoded)
 }
 

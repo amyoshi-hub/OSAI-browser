@@ -30,7 +30,6 @@ fn parse_packet(payload: &[u8]) -> Option<([u8; 16], [u8; 8], [u8; 2], [u8; 14],
 
 #[tauri::command]
 pub async fn start_server(app_handle: tauri::AppHandle, ip: String, port: String) -> Result<String, String> {
-    //let address = format!("{}:{}", ip, port);
     let address = format!("0.0.0.0:{}", port);
     println!("Attempting to bind UDP server to: {}", address);
 

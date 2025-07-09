@@ -18,6 +18,7 @@ const P2P = () => {
   
   const navigate = useNavigate();
 
+  //TODO:サーバーは0.0.0.0で固定で起動しているのでipは渡さなくて良い
   const startServer = async () => {
     try {
       let result: string;
@@ -34,7 +35,7 @@ const P2P = () => {
       setViewText(`Server start failed: ${error}`);
     }
   };
-
+  //TODO:後で完全に実装すればいいしここじゃなくても良い
   const sendText = async () => {
   try {
     console.log(`Sending data from ${ip}:${port} to ${toIp}:${toPort}`);
@@ -47,8 +48,6 @@ const P2P = () => {
       //dst_port: parseInt(toPort),
       text,
     });
- 
-
     setViewText(result || "Text sent successfully.");
   } catch (error) {
     console.error("Text send error:", error);
@@ -66,9 +65,16 @@ const P2P = () => {
     }
   };
 
-  const move_share = async () => {
+  const move_share = async (server: string) => {
  	try {
-		navigate("/share");	
+		const [ip] = server.split(":");
+		//portがバグっているので強制的に8080
+		//const port = parseInt(portStr || "8080");
+		const port = "8080";
+
+		navigate("/share", {
+			state: {ip, port},	
+		});	
 	}catch(error){
 		console.log(`move_error${error}`);
 	} 
@@ -77,14 +83,12 @@ const P2P = () => {
   const addServer = (server: string) => {
     setServerList((prev) => [...prev, server]);
   };
-
     useEffect(() => {
     const unlisten = listen("add_server", (event: { payload: {addr: string; port: string}}) => {
       const { addr, port } = event.payload as { addr: string; port: string };
       console.log(`新しいサーバー: ${addr}:${port}`);
       setServerList((prev) => [...prev, `${addr}:${port}`]);
     });
-
     return () => {
       unlisten.then((fn) => fn());
     };
@@ -120,7 +124,7 @@ const P2P = () => {
         ) : (
           <ul>
             {serverList.map((server, index) => (
-              <button key={index} onClick={move_share}>{server}</button>
+              <button key={index} onClick={() => move_share(server)}>{server}</button>
             ))}
           </ul>
         )}

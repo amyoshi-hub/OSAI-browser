@@ -14,7 +14,6 @@ fn get_or_create_share_dir() -> Result<String, String> {
     if !base_dir.exists() {
         std::fs::create_dir(&base_dir).map_err(|e| e.to_string())?;
     }
-
     Ok(base_dir.to_string_lossy().to_string())
 }
 

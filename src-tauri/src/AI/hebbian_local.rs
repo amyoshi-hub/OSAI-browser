@@ -7,8 +7,8 @@ const OUTPUT_SIZE: usize = 1;
 const EPOCHS: usize = 10000;
 const ALPHA: f64 = 0.5;
 
-fn sigmoid(x: f64) -> f64 {
-    1.0 / (1.0 + (-x).exp())
+fn relu(x: f64) -> f64{
+    x.max(0.0);
 }
 
 fn rnd() -> f64 {
@@ -57,10 +57,10 @@ fn main() {
             let mut hidden = [0.0; HIDDEN_SIZE];
             for i in 0..HIDDEN_SIZE {
                 hidden[i] = (0..INPUT_SIZE).map(|j| w1[i][j] * input[j]).sum::<f64>();
-                hidden[i] = sigmoid(hidden[i]);
+                hidden[i] = relu(hidden[i]);
             }
 
-            let output = sigmoid(hidden.iter().zip(w2.iter()).map(|(h, w)| h * w).sum::<f64>());
+            let output = relu(hidden.iter().zip(w2.iter()).map(|(h, w)| h * w).sum::<f64>());
             let error_out = targets[n] - output;
 
             // Calculate hidden errors
@@ -68,7 +68,8 @@ fn main() {
 
             // Update w2 (hidden -> output)
             for j in 0..HIDDEN_SIZE {
-                w2[j] += ALPHA * error_out * hidden[j];
+                let alpha = ALPHA * (1.0 / (1.0 + epoch as f64 / EPOCHS as f64));
+                w2[j] += alpha * error_out * hidden[j];
             }
 
             // Update w1 (input -> hidden) with shared errors
@@ -87,7 +88,7 @@ fn main() {
         let mut hidden = [0.0; HIDDEN_SIZE];
         for i in 0..HIDDEN_SIZE {
             hidden[i] = (0..INPUT_SIZE).map(|j| w1[i][j] * input[j]).sum::<f64>();
-            hidden[i] = sigmoid(hidden[i]);
+            hidden[i] = relu(hidden[i]);
         }
 
         let output = sigmoid(hidden.iter().zip(w2.iter()).map(|(h, w)| h * w).sum::<f64>());

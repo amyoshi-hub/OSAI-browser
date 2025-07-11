@@ -17,6 +17,8 @@ use file_server::get_file_list;
 use file_read::read_file_content;
 use http_server::{http_server, open_url_window, fetch_file_list, request_file};
 use http_server::FileList;
+mod AI;
+mod format_handler;
 
 
 #[tokio::main]

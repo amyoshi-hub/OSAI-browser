@@ -66,8 +66,8 @@ pub async fn send_text(
 
     // ここで固定値や適当な値を用意
     let session_id = [0u8; 16];       // 本当はランダム等にする
-    let format_signal = [0u8; 2];     // 適宜設定
-    let data_vec = [0u8; 14];         // 適宜設定
+    let format_signal = [0, 2];     // 適宜設定
+    let data_vec = [5u8; 14];         // 適宜設定
 
     // filenameをcloneしてmoveに持ち込む
     let text_clone = text.clone();

@@ -1,98 +1,95 @@
 use rand::Rng;
-use std::f64::consts::E;
 
-const INPUT_SIZE: usize = 2;
-const HIDDEN_SIZE: usize = 3;
-const OUTPUT_SIZE: usize = 1;
-const EPOCHS: usize = 10000;
-const ALPHA: f64 = 0.5;
+const INPUT_SIZE: usize = 14;
+const HIDDEN_SIZE: usize = 1024;
+const OUTPUT_SIZE: usize = 14;
+const ALPHA: f64 = 0.1;
+const EPOCHS: usize = 10;
+const SIMI_THRESHOLD: f64 = 0.95;
 
-fn relu(x: f64) -> f64{
-    x.max(0.0);
+fn convert_u8_to_f64_array(input: [u8; 14]) -> [f64; 14] {
+    let mut result = [0.0; 14];
+    for (i, val) in input.iter().enumerate() {
+        result[i] = *val as f64 / 255.0;
+    }
+    result
 }
 
-fn rnd() -> f64 {
+fn convert_f64_to_u8_array(input: [f64; 14]) -> [u8; 14] {
+    let mut result = [0u8; 14];
+    for (i, val) in input.iter().enumerate() {
+        result[i] = (val * 255.0).clamp(0.0, 255.0) as u8;
+    }
+    result
+}
+
+fn sigmoid(x: f64) -> f64 {
+    1.0 / (1.0 + f64::exp(-x))
+}
+
+fn rand_init() -> f64 {
     let mut rng = rand::thread_rng();
-    rng.gen_range(-1.0..1.0)
+    rng.gen_range(-1.0..=1.0)
 }
 
-fn shared_error(index: usize, errors: &[f64]) -> f64 {
-    let mut sum = 0.0;
-    let mut count = 0;
+fn calc_and_return_output(input: [f64; 14]) -> [f64; 14] {
+    let mut w1: Vec<Vec<f64>> = (0..HIDDEN_SIZE)
+        .map(|_| (0..INPUT_SIZE).map(|_| rand_init()).collect())
+        .collect();
 
-    for i in index.saturating_sub(1)..=(index + 1).min(errors.len() - 1) {
-        sum += errors[i];
-        count += 1;
-    }
-    sum / count as f64
-}
+    let mut w2: Vec<Vec<f64>> = (0..OUTPUT_SIZE)
+        .map(|_| (0..HIDDEN_SIZE).map(|_| rand_init()).collect())
+        .collect();
 
-fn main() {
-    let inputs = [
-        [0.0, 0.0],
-        [0.0, 1.0],
-        [1.0, 0.0],
-        [1.0, 1.0],
-    ];
-    let targets = [0.0, 1.0, 1.0, 0.0];
-
-    // Initialize weights: input -> hidden
-    let mut w1: [[f64; INPUT_SIZE]; HIDDEN_SIZE] = [[0.0; INPUT_SIZE]; HIDDEN_SIZE];
+    // フォワードパス (隠れ層)
+    let mut hidden = vec![0.0; HIDDEN_SIZE];
     for i in 0..HIDDEN_SIZE {
+        let mut sum = 0.0;
         for j in 0..INPUT_SIZE {
-            w1[i][j] = rnd();
+            sum += w1[i][j] * input[j];
         }
+        hidden[i] = sigmoid(sum);
     }
 
-    // Initialize weights: hidden -> output
-    let mut w2: [f64; HIDDEN_SIZE] = [0.0; HIDDEN_SIZE];
-    for j in 0..HIDDEN_SIZE {
-        w2[j] = rnd();
+    // フォワードパス (出力層)
+    let mut output = [0.0; OUTPUT_SIZE];
+    for i in 0..OUTPUT_SIZE {
+        let mut sum = 0.0;
+        for j in 0..HIDDEN_SIZE {
+            sum += w2[i][j] * hidden[j];
+        }
+        output[i] = sigmoid(sum);
     }
 
-    // Training
-    for _ in 0..EPOCHS {
-        for (n, &input) in inputs.iter().enumerate() {
-            // Forward pass
-            let mut hidden = [0.0; HIDDEN_SIZE];
-            for i in 0..HIDDEN_SIZE {
-                hidden[i] = (0..INPUT_SIZE).map(|j| w1[i][j] * input[j]).sum::<f64>();
-                hidden[i] = relu(hidden[i]);
-            }
+    output
+}
 
-            let output = relu(hidden.iter().zip(w2.iter()).map(|(h, w)| h * w).sum::<f64>());
-            let error_out = targets[n] - output;
-
-            // Calculate hidden errors
-            let hidden_errors: Vec<f64> = w2.iter().map(|&w| error_out * w).collect();
-
-            // Update w2 (hidden -> output)
-            for j in 0..HIDDEN_SIZE {
-                let alpha = ALPHA * (1.0 / (1.0 + epoch as f64 / EPOCHS as f64));
-                w2[j] += alpha * error_out * hidden[j];
-            }
-
-            // Update w1 (input -> hidden) with shared errors
-            for i in 0..HIDDEN_SIZE {
-                let shared = shared_error(i, &hidden_errors);
-                for j in 0..INPUT_SIZE {
-                    w1[i][j] += ALPHA * shared * input[j];
-                }
-            }
+fn check_similarity(a: [u8; 14], b: [u8; 14]) -> f64 {
+    let mut match_count = 0;
+    for i in 0..14 {
+        if a[i] == b[i] {
+            match_count += 1;
         }
     }
+    match_count as f64 / 14.0
+}
 
-    // Test
-    println!("Result after training:");
-    for &input in &inputs {
-        let mut hidden = [0.0; HIDDEN_SIZE];
-        for i in 0..HIDDEN_SIZE {
-            hidden[i] = (0..INPUT_SIZE).map(|j| w1[i][j] * input[j]).sum::<f64>();
-            hidden[i] = relu(hidden[i]);
+pub fn AI(my_vec: [u8; 14], input_vec: [u8; 14]) -> ([u8; 14], bool) {
+    let input_vec_f64 = convert_u8_to_f64_array(input_vec);
+    let output_f64 = calc_and_return_output(input_vec_f64);
+    let output_u8 = convert_f64_to_u8_array(output_f64);
+
+    let similarity = check_similarity(my_vec, input_vec);
+
+    if similarity >= SIMI_THRESHOLD {
+        let mut new_vec = [0u8; 14];
+        for i in 0..14 {
+            new_vec[i] = ((my_vec[i] as u16 + output_u8[i] as u16) / 2) as u8;
         }
-
-        let output = sigmoid(hidden.iter().zip(w2.iter()).map(|(h, w)| h * w).sum::<f64>());
-        println!("in: {:.0} {:.0} -> out: {:.3}", input[0], input[1], output);
+        (new_vec, true)
+    } else {
+        println!("enemy");
+        (my_vec, false)
     }
 }
 

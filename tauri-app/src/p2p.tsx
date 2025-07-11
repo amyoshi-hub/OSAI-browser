@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { listen } from "@tauri-apps/api/event";
 import "./App.css";
 
+import GraphVisualization from "./p2p/host_nodes";
+
 //from ip use read local ip
 const P2P = () => {
   const [ip, setIp] = useState("127.0.0.1");
@@ -44,8 +46,8 @@ const P2P = () => {
     const result = await invoke<string>("send_text", {
       //src_ip: ip,
       //src_port: parseInt(port),
-      //dst_ip: toIp,
-      //dst_port: parseInt(toPort),
+      dst_ip: toIp,
+      dst_port: parseInt(toPort),
       text,
     });
     setViewText(result || "Text sent successfully.");
@@ -95,7 +97,7 @@ const P2P = () => {
   }, []);
 
   return (
-    <div>
+    <div style={{maxHeight: "100vh", overflowY: "auto", padding: "20px"}}>
       <a href="index.html">Back to Menu</a>
       <p>
       use_UDP<input 
@@ -118,17 +120,28 @@ const P2P = () => {
       <button onClick={startServer}>Start Server</button>
       
       <h2>Server List</h2>
-      <div>
+	<div
+  	style={{
+    	width: "100%",
+    	height: "400px",
+    	overflow: "hedden",
+    	border: "1px solid #ccc",
+    	background: "#f9f9f9"
+  	}}
+	>
+      	
         {serverList.length === 0 ? (
           <p>No servers available</p>
         ) : (
-          <ul>
-            {serverList.map((server, index) => (
-              <button key={index} onClick={() => move_share(server)}>{server}</button>
-            ))}
-          </ul>
+          <GraphVisualization nodeCount={serverList.length}
+      		onNodeClick={(index: number) => {
+			const server = serverList[index];	
+			move_share(server);
+		}} 
+	 />
         )}
       </div>
+      
 
       <h2>P2P Channel</h2>
       <div>
@@ -156,13 +169,12 @@ const P2P = () => {
           <input value={toPort} onChange={(e) => setToPort(e.target.value)} placeholder="1234" />
         </label>
         <label>
-	<p>
           <h2>Send Text Content:</h2>
-	</p>
           <input value={text} onChange={(e) => setSendText(e.target.value)} placeholder="hello" />
       	  <button onClick={sendText}>Send Text</button>
         </label>
       </div>
+      <br></br>
     </div>
   );
 };

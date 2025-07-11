@@ -83,6 +83,8 @@ const Share: React.FC = () => {
   
   return (
     <div>
+      <a href="index.html">Back to Menu</a>
+
       <h1>HTTP File Server</h1>
       <button onClick={openNewWindow}>Start Server and Open</button>
       <button onClick={loadFileList}>Load File List</button>

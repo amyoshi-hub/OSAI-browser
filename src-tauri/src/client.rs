@@ -47,8 +47,8 @@ pub async fn send_text(
     app_handle: tauri::AppHandle,
     //src_ip: String,
     //src_port: u16,
-    //dst_ip: String,
-    //dst_port: u16,
+    dst_ip: String,
+    dst_port: u16,
     text: String,
 ) -> Result<String, String> {
     println!("i was call by tauri");
@@ -59,8 +59,6 @@ pub async fn send_text(
 
     let src_ip = "127.0.0.1";
     let src_port: u16 = 1234;
-    let dst_ip = "127.0.0.1";
-    let dst_port: u16 = 1234;
 
     let src_ip: Ipv4Addr = src_ip.parse().map_err(|e| format!("Invalid src_ip: {}", e))?;
     let dst_ip: Ipv4Addr = dst_ip.parse().map_err(|e| format!("Invalid dst_ip: {}", e))?;

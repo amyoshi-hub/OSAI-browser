@@ -10,8 +10,8 @@ import GraphVisualization from "./p2p/host_nodes";
 const P2P = () => {
   const [ip, setIp] = useState("127.0.0.1");
   const [port, setPort] = useState("1234");
-  const [toIp, setToIp] = useState("127.0.0.1");
-  const [toPort, setToPort] = useState("1234");
+  const [dstIp, setToIp] = useState("127.0.0.1");
+  const [dstPort, setToPort] = useState("1234");
   const [text, setSendText] = useState("text");
   const [viewText, setViewText] = useState("bulletin board");
   const [serverList, setServerList] = useState<string[]>([]);
@@ -40,14 +40,14 @@ const P2P = () => {
   //TODO:後で完全に実装すればいいしここじゃなくても良い
   const sendText = async () => {
   try {
-    console.log(`Sending data from ${ip}:${port} to ${toIp}:${toPort}`);
-    console.log(typeof ip, typeof parseInt(port), typeof toIp, typeof parseInt(toPort));
+    console.log(`Sending data from ${ip}:${port} to ${dstIp}:${dstPort}`);
+    console.log(typeof ip, typeof parseInt(port), typeof dstIp, typeof parseInt(dstPort));
 
     const result = await invoke<string>("send_text", {
       //src_ip: ip,
       //src_port: parseInt(port),
-      dst_ip: toIp,
-      dst_port: parseInt(toPort),
+      dstIp,
+      dstPort: parseInt(dstPort),
       text,
     });
     setViewText(result || "Text sent successfully.");
@@ -145,7 +145,7 @@ const P2P = () => {
 
       <h2>P2P Channel</h2>
       <div>
-        <button onClick={loadText}>Load Bulletin Board</button>
+        <button onClick={loadText}>Load Bulletin Board(not impl)</button>
         <p>{viewText}</p>
         <button onClick={() => addServer(`${ip}:${port}`)}>Add Server</button>
       </div>
@@ -162,11 +162,11 @@ const P2P = () => {
         </label>
         <label>
           To IP:
-          <input value={toIp} onChange={(e) => setToIp(e.target.value)} placeholder="127.0.0.1" />
+          <input value={dstIp} onChange={(e) => setToIp(e.target.value)} placeholder="127.0.0.1" />
         </label>
         <label>
           To Port:
-          <input value={toPort} onChange={(e) => setToPort(e.target.value)} placeholder="1234" />
+          <input value={dstPort} onChange={(e) => setToPort(e.target.value)} placeholder="1234" />
         </label>
         <label>
           <h2>Send Text Content:</h2>

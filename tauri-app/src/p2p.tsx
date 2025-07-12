@@ -84,14 +84,22 @@ const P2P = () => {
 	} 
   };
 
-  const addServer = (server: string) => {
-    setServerList((prev) => [...prev, server]);
+  const addServer = (addr: string, port: string) => {
+    const server = `${addr}:${port}`;
+    setServerList((prev) => {
+	let alreadyExist = prev.some((entry) => entry.split(":")[0] === addr);
+	if(alreadyExist){
+		console.log("すでに存在しています");
+		return prev;	
+	}		  
+		return  [...prev, server];
+    });
   };
     useEffect(() => {
     const unlisten = listen("add_server", (event: { payload: {addr: string; port: string}}) => {
       const { addr, port } = event.payload as { addr: string; port: string };
       console.log(`新しいサーバー: ${addr}:${port}`);
-      setServerList((prev) => [...prev, `${addr}:${port}`]);
+      addServer(addr, port);
     });
     return () => {
       unlisten.then((fn) => fn());
@@ -143,13 +151,24 @@ const P2P = () => {
 	 />
         )}
       </div>
+
+      <h2>Discovered Servers</h2>
+	<ul>
+  	{serverList.map((server, index) => {
+    	const [ip, port] = server.split(":");
+    	return (
+      		<li key={index}>
+        	IP: {ip}, Port: {port}
+      		</li>
+    	);
+  	})}
+	</ul>
       
 
       <h2>P2P Channel</h2>
       <div>
         <button onClick={loadText}>Load Bulletin Board(not impl)</button>
         <p>{viewText}</p>
-        <button onClick={() => addServer(`${ip}:${port}`)}>Add Server</button>
       </div>
 
       <h2>Client</h2>

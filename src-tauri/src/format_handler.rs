@@ -54,6 +54,7 @@ pub fn process_format(
                 port: port.clone(),
             };
 
+            println!("DEBUG RAW ADDR: {:?}", addr);
             if let Err(e) = app_handle.emit("add_server", server_info) {
                 eprintln!("Failed to emit add_server event: {}", e);
             }

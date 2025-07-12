@@ -3,15 +3,15 @@ import { invoke } from "@tauri-apps/api/core";
 import { useNavigate } from "react-router-dom";
 import { listen } from "@tauri-apps/api/event";
 import "./App.css";
+import "./style/aqua.scss";
 
 import GraphVisualization from "./p2p/host_nodes";
 
 //from ip use read local ip
 const P2P = () => {
-  const [ip, setIp] = useState("127.0.0.1");
   const [port, setPort] = useState("1234");
   const [dstIp, setToIp] = useState("127.0.0.1");
-  const [dstPort, setToPort] = useState("1234");
+  const [dstPort, setToPort] = useState("12345");
   const [text, setSendText] = useState("text");
   const [viewText, setViewText] = useState("bulletin board");
   const [serverList, setServerList] = useState<string[]>([]);
@@ -25,11 +25,11 @@ const P2P = () => {
     try {
       let result: string;
       if (useUdpProtocol){
-      	console.log(`Starting server at ${ip}:${port}`);
-      	result = await invoke<string>("start_server", { ip, port });
+      	console.log(`Starting server at ${port}`);
+      	result = await invoke<string>("start_server", { port });
       }else{
-      	console.log(`Starting websocket server at ${ip}:${port}`);
-	result = await invoke<string>("start_websocket_server", {ip, port});
+      	console.log(`Starting websocket server at ${port}`);
+	result = await invoke<string>("start_websocket_server", {port});
       }
       setViewText(result || "Server started successfully.");
     } catch (error) {
@@ -42,8 +42,8 @@ const P2P = () => {
   setInterval(() => {
   (async () => {
     try {
-      console.log(`Sending data from ${ip}:${port} to ${dstIp}:${dstPort}`);
-      console.log(typeof ip, typeof parseInt(port), typeof dstIp, typeof parseInt(dstPort));
+      console.log(`Sending data from ${port} to ${dstIp}:${dstPort}`);
+      console.log(typeof dstIp, typeof parseInt(port), typeof dstIp, typeof parseInt(dstPort));
 
       const result = await invoke<string>("send_text", {
         dstIp,
@@ -71,13 +71,13 @@ const P2P = () => {
 
   const move_share = async (server: string) => {
  	try {
+		//portがバグっているので強制的に12345を使ってもらう　８８８８とか？
+		//const port = parseInt(portStr || "12345");
 		const [ip] = server.split(":");
-		//portがバグっているので強制的に8080
-		//const port = parseInt(portStr || "8080");
-		const port = "8080";
+		const move_port = "1234";
 
 		navigate("/share", {
-			state: {ip, port},	
+			state: {ip, move_port},	
 		});	
 	}catch(error){
 		console.log(`move_error${error}`);
@@ -87,7 +87,7 @@ const P2P = () => {
   const addServer = (addr: string, port: string) => {
     const server = `${addr}:${port}`;
     setServerList((prev) => {
-	let alreadyExist = prev.some((entry) => entry.split(":")[0] === addr);
+    	const alreadyExist = prev.some(entry => entry.split(":")[0] === addr);
 	if(alreadyExist){
 		console.log("すでに存在しています");
 		return prev;	
@@ -109,35 +109,36 @@ const P2P = () => {
   return (
     <div style={{maxHeight: "100vh", overflowY: "auto", padding: "20px"}}>
       <a href="index.html">Back to Menu</a>
-      <p>
+      <label style={{fontSize: "35px", display: "flex", marginTop: "2vh"}}>
       use_UDP<input 
       type="checkbox" 
       checked={useUdpProtocol}
       onChange={(e) => setUseUdpProtocol(e.target.checked)}
+      style={{transform: "Scale(1)", marginLeft: "1vw"}}
+      className="aqua frutiger-text"
       />
-      </p>
-      <h2>Setup as Server</h2>
+      </label>
+      <h2 style={{marginTop: "5vh"}}>Setup as Server</h2>
       <div>
         <label>
-          IP: 
-          <input value={ip} onChange={(e) => setIp(e.target.value)} placeholder="127.0.0.1" />
-        </label>
-        <label>
           Port:
-          <input value={port} onChange={(e) => setPort(e.target.value)} placeholder="1234" />
+          <input className="aqua-input" value={port} onChange={(e) => setPort(e.target.value)} placeholder="1234" />
         </label>
       </div>
-      <button onClick={startServer}>Start Server</button>
+      <br></br>
+      <button className="aqua" style={{marginLeft: "2vw"}}onClick={startServer}>Start Server</button>
       
+      <br></br><br></br>
       <h2>Server List</h2>
 	<div
   	style={{
-    	width: "100%",
+    	width: "40%",
     	height: "400px",
     	overflow: "hedden",
     	border: "1px solid #ccc",
     	background: "#f9f9f9"
   	}}
+	className="aqua"
 	>
       	
         {serverList.length === 0 ? (
@@ -165,36 +166,30 @@ const P2P = () => {
 	</ul>
       
 
+      <br></br><br></br>
       <h2>P2P Channel</h2>
       <div>
-        <button onClick={loadText}>Load Bulletin Board(not impl)</button>
+        <button className="aqua" onClick={loadText}>Load Bulletin Board(not impl)</button>
         <p>{viewText}</p>
       </div>
 
+      <br></br>
       <h2>Client</h2>
+      <h2 style={{marginLeft: "40vw"}}>Send Text Content:</h2>
       <div>
         <label>
-          From IP: 
-          <input value={ip} onChange={(e) => setIp(e.target.value)} placeholder="127.0.0.1" />
-        </label>
-        <label>
-          From Port:
-          <input value={port} onChange={(e) => setPort(e.target.value)} placeholder="1234" />
-        </label>
-        <label>
           To IP:
-          <input value={dstIp} onChange={(e) => setToIp(e.target.value)} placeholder="127.0.0.1" />
+          <input className="aqua-input" value={dstIp} onChange={(e) => setToIp(e.target.value)} placeholder="127.0.0.1" />
         </label>
         <label>
           To Port:
-          <input value={dstPort} onChange={(e) => setToPort(e.target.value)} placeholder="1234" />
+          <input className="aqua-input" value={dstPort} onChange={(e) => setToPort(e.target.value)} placeholder="1234" />
         </label>
         <label>
-          <h2>Send Text Content:</h2>
-          <input value={text} onChange={(e) => setSendText(e.target.value)} placeholder="hello" />
+          <input className="aqua-input" style={{marginLeft: "5vw"}}value={text} onChange={(e) => setSendText(e.target.value)} placeholder="hello" />
         </label>
       </div>
-      <br></br>
+      <br></br><br></br><br></br><br></br>
     </div>
   );
 };

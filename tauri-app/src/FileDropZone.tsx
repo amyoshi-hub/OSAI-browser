@@ -54,11 +54,11 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({ filePath, errorMessage, onF
 
   return (
     <div
-      className={`border-2 border-dashed px-10 py-4 text-center w-full transition-colors ${
+      className={`aqua border-2 border-dashed px-10 py-4 text-center w-full transition-colors ${
         isHovered ? 'border-gray-500 bg-gray-100' : 'border-gray-300'
       }`}
     >
-      <div className='min-h-24 flex flex-col justify-center items-center'>
+      <div className='aqua min-h-24 flex flex-col justify-center items-center'>
         {filePath ? (
           <p style={{color: "black"}}>{filePath}</p>
         ) : (

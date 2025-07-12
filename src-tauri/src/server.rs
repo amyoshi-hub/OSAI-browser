@@ -54,7 +54,7 @@ async fn server_launch_signal(port: &str) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub async fn start_server(app_handle: tauri::AppHandle, ip: String, port: String) -> Result<String, String> {
+pub async fn start_server(app_handle: tauri::AppHandle, port: String) -> Result<String, String> {
     let address = format!("0.0.0.0:{}", port);
     println!("Attempting to bind UDP server to: {}", address);
 

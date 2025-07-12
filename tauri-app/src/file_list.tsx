@@ -68,12 +68,12 @@ const FileDownloaderPage: React.FC = () => {
   return (
     <div>
       <h3>Files</h3>
-      <button onClick={() => loadFiles()}>Load Local Files</button>
+      <button className="aqua" onClick={() => loadFiles()}>Load Local Files</button>
       <ul>
         {fileList.map((file, idx) => (
           <li key={idx}>
             {file}
-            <button onClick={() => downloadFile(file)}>Download</button>
+            <button className="aqua" onClick={() => downloadFile(file)}>Download</button>
           </li>
         ))}
       </ul>

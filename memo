@@ -22,3 +22,10 @@ export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER="aarch64-linux-gnu-gcc"
 IOT機器などtauriごと入らないものは
 python serverなどをたててfiles.jsonをshareディレクトリにおき
 OSAI/client/dummy/start_serなどのシグナルを送ることによってサーバーとしてOSAIに追加できる
+
+
+windows build:
+pcapのSDKをわかりやすく名前変えたりして、libディレクトリに入れるとするならば
+$env:RUSTFLAGS = "-L C:\Users\UserName\dev\OSAI-browser-dev\lib\npcap\Lib"
+をシェルで打ち込み
+それからcargo tauri build

@@ -66,6 +66,8 @@ return (
         <button className="aqua" onClick={loadP2PPage}>P2P</button>
 	<br></br><br></br>
         <button className="aqua" onClick={() => alert("セキュリティ設定 未実装")}>SECURITY</button>
+	<br></br><br></br>
+        <button className="aqua" onClick={() => alert("セキュリティ設定 未実装")}>SETING</button>
       </ul>
     </div>
   )}

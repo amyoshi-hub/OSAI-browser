@@ -1,5 +1,5 @@
 $background-color: deepskyblue;
-$dark-bg: darken($background-color, 30%);
+$dark-bg: color.adjust($background-color, $lightness: -30%);
 $unchecked-background: linear-gradient(to bottom, #737373, #fff);
 $bottom-glow: radial-gradient(farthest-corner at bottom, white, transparent);
 

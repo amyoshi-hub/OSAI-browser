@@ -32,14 +32,49 @@ fn rand_init() -> f64 {
     rng.gen_range(-1.0..=1.0)
 }
 
-fn calc_and_return_output(input: [f64; 14]) -> [f64; 14] {
-    let mut w1: Vec<Vec<f64>> = (0..HIDDEN_SIZE)
-        .map(|_| (0..INPUT_SIZE).map(|_| rand_init()).collect())
-        .collect();
 
-    let mut w2: Vec<Vec<f64>> = (0..OUTPUT_SIZE)
-        .map(|_| (0..HIDDEN_SIZE).map(|_| rand_init()).collect())
-        .collect();
+fn train_one_epoch(w1: &mut Vec<Vec<f64>>, w2: &mut Vec<Vec<f64>>, input: [f64; 14], target: [f64; 14]) {
+    let mut hidden = vec![0.0; HIDDEN_SIZE];
+    for i in 0..HIDDEN_SIZE {
+        let mut sum = 0.0;
+        for j in 0..INPUT_SIZE {
+            sum += w1[i][j] * input[j];
+        }
+        hidden[i] = sigmoid(sum);
+    }
+
+    let mut output = vec![0.0; OUTPUT_SIZE];
+    for i in 0..OUTPUT_SIZE {
+        let mut sum = 0.0;
+        for j in 0..HIDDEN_SIZE {
+            sum += w2[i][j] * hidden[j];
+        }
+        output[i] = sigmoid(sum);
+    }
+
+    let mut output_errors = vec![0.0; OUTPUT_SIZE];
+    for i in 0..OUTPUT_SIZE {
+        output_errors[i] = target[i] - output[i];
+    }
+
+    for i in 0..OUTPUT_SIZE {
+        for j in 0..HIDDEN_SIZE {
+            w2[i][j] += ALPHA * output_errors[i] * hidden[j];
+        }
+    }
+
+    for i in 0..HIDDEN_SIZE {
+        let mut hidden_error = 0.0;
+        for k in 0..OUTPUT_SIZE {
+            hidden_error += output_errors[k] * w2[k][i];
+        }
+        for j in 0..INPUT_SIZE {
+            w1[i][j] += ALPHA * hidden_error * input[j];
+        }
+    }
+}
+
+fn calc_and_return_output(input: [f64; 14], w1: &mut Vec<Vec<f64>>, w2: &mut Vec<Vec<f64>>) -> [f64; 14] {
 
     // フォワードパス (隠れ層)
     let mut hidden = vec![0.0; HIDDEN_SIZE];
@@ -74,12 +109,16 @@ fn check_similarity(a: [u8; 14], b: [u8; 14]) -> f64 {
     match_count as f64 / 14.0
 }
 
-pub fn AI(my_vec: [u8; 14], input_vec: [u8; 14]) -> ([u8; 14], bool) {
-    let input_vec_f64 = convert_u8_to_f64_array(input_vec);
-    let output_f64 = calc_and_return_output(input_vec_f64);
+pub fn AI(my_vec: [u8; 14], target_vec: [u8; 14], w1: &mut Vec<Vec<f64>>, w2: &mut Vec<Vec<f64>>) -> ([u8; 14], bool) {
+    let my_input_f64 = convert_u8_to_f64_array(my_vec);
+    let target_f64 = convert_u8_to_f64_array(target_vec);
+
+    train_one_epoch(w1, w2, my_input_f64, target_f64);
+    let output_f64 = calc_and_return_output(target_f64, w1, w2);
     let output_u8 = convert_f64_to_u8_array(output_f64);
 
-    let similarity = check_similarity(my_vec, input_vec);
+    let similarity = check_similarity(my_vec, output_u8);
+    println!("{}", similarity);
 
     if similarity >= SIMI_THRESHOLD {
         let mut new_vec = [0u8; 14];

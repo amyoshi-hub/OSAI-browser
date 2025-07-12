@@ -71,8 +71,20 @@ pub async fn start_server(app_handle: tauri::AppHandle, ip: String, port: String
     app_handle.emit("server_status", format!("Server started on {}", address))
         .map_err(|e| format!("Failed to emit event: {}", e))?;
 
-    //server起動シグナル
-    server_launch_signal(&port).await?;
+
+    //cloneよりもarcとか使ったほうが良いのかな？
+    let port_for_signal = port.clone();
+    task::spawn(async move {
+        loop{
+        // 受信ループの起動前に少し待つ（サーバー起動準備時間）
+        tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+
+        //signal送信
+        if let Err(e) = server_launch_signal(&port_for_signal).await {
+            eprintln!("Failed to send server launch signal: {}", e);
+        }
+        }
+    });
 
     task::spawn(async move {
         let mut buf = [0; 1024];

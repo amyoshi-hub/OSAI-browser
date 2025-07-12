@@ -37,25 +37,27 @@ const P2P = () => {
       setViewText(`Server start failed: ${error}`);
     }
   };
-  //TODO:後で完全に実装すればいいしここじゃなくても良い
-  const sendText = async () => {
-  try {
-    console.log(`Sending data from ${ip}:${port} to ${dstIp}:${dstPort}`);
-    console.log(typeof ip, typeof parseInt(port), typeof dstIp, typeof parseInt(dstPort));
+  
+  //応急処置でintervalをfrontからやっている
+  setInterval(() => {
+  (async () => {
+    try {
+      console.log(`Sending data from ${ip}:${port} to ${dstIp}:${dstPort}`);
+      console.log(typeof ip, typeof parseInt(port), typeof dstIp, typeof parseInt(dstPort));
 
-    const result = await invoke<string>("send_text", {
-      //src_ip: ip,
-      //src_port: parseInt(port),
-      dstIp,
-      dstPort: parseInt(dstPort),
-      text,
-    });
-    setViewText(result || "Text sent successfully.");
-  } catch (error) {
-    console.error("Text send error:", error);
-    setViewText(`Text send failed: ${error}`);
-  }
-  };
+      const result = await invoke<string>("send_text", {
+        dstIp,
+        dstPort: parseInt(dstPort),
+        text,
+      });
+      setViewText(result || "Text sent successfully.");
+    } catch (error) {
+      console.error("Text send error:", error);
+      setViewText(`Text send failed: ${error}`);
+    }
+  })();
+}, 5000);
+
  
   const loadText = async () => {
     try {
@@ -171,7 +173,6 @@ const P2P = () => {
         <label>
           <h2>Send Text Content:</h2>
           <input value={text} onChange={(e) => setSendText(e.target.value)} placeholder="hello" />
-      	  <button onClick={sendText}>Send Text</button>
         </label>
       </div>
       <br></br>

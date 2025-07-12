@@ -167,6 +167,7 @@ dependencies = [
  "futures-util",
  "hex",
  "log",
+ "once_cell",
  "pnet",
  "rand 0.9.1",
  "reqwest",

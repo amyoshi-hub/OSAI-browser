@@ -8,10 +8,11 @@ pub fn build_server_announce_packet(
 ) -> usize { // <--- 戻り値は `usize` のままにします。パケットの長さを返すため。
     let mut rng = rand::rng();
     
-    let mut session_id: [u8; 16] = [0; 16]; // 16バイトの配列を初期化
+    //parser
+    let mut session_id: [u8; 16] = [255; 16]; // 16バイトの配列を初期化
     rng.fill(&mut session_id); // rand::Rng::fill() を使って配列をランダムなバイトで埋める
 
-    let chunk: [u8; 8] = [0; 8];          // シグナル用なので全て0でOK
+    let chunk: [u8; 8] = [255; 8];          // シグナル用なので全て0でOK
     let format_signal: [u8; 2] = [0xFF, 0xFF]; // サーバー生存シグナル
     let data_vec: [u8; 14] = [0; 14];     // シグナル用なので全て0でOK
     let data: &[u8] = b"OSAI Server Online"; // 簡潔なメッセージ (UTF-8)

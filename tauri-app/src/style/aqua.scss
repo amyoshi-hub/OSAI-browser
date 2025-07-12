@@ -1,4 +1,5 @@
 $background-color: deepskyblue;
+@use "sass:color";
 $dark-bg: color.adjust($background-color, $lightness: -30%);
 $unchecked-background: linear-gradient(to bottom, #737373, #fff);
 $bottom-glow: radial-gradient(farthest-corner at bottom, white, transparent);

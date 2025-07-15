@@ -54,3 +54,6 @@ Currently, P2P functionality requires administrator privileges.
  need sudo permission
 ## file drag install:
 please include "index.html" in zip file
+
+## process
+- now divideing to library

@@ -54,7 +54,6 @@ pub async fn send_file(
 ) -> Result<String, String> {
 */
 pub async fn send_text(app_handle: tauri::AppHandle) -> Result<String, String> {
-    println!("i was call by tauri");
     use std::net::Ipv4Addr;
     use pnet::transport::{transport_channel, TransportChannelType::Layer4, TransportProtocol};
     use pnet::packet::ip::IpNextHeaderProtocols;

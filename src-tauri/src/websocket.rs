@@ -1,9 +1,8 @@
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle};
 use tokio::net::TcpListener;
 use tokio_tungstenite::accept_async;
 use futures_util::{StreamExt, SinkExt};
 use tauri::Emitter;
-use std::net::SocketAddr;
 
 // WebSocketサーバーをバックグラウンドで開始するTauriコマンド
 #[tauri::command]

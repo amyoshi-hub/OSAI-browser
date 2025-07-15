@@ -16,8 +16,8 @@
   font-weight: 400;
 
   color: #0f0f0f;
-  background: linear-gradient(#dcd3bAA, 90%, #00d0e8AA);
-  background: linear-gradient(to bottom, rgba(220, 211, 186, 0.67), rgba(0, 208, 232, 0.67));
+  background: linear-gradient(#dcd3bAA, 100%, #00d0e8FF);
+  background: linear-gradient(to bottom, rgba(220, 211, 186, 0.7), rgba(0, 108, 200, 1));
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -67,24 +67,25 @@ h1 {
 
 input,
 button {
-  border-radius: 8px;
+  border-radius: 12px;
   border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
+  padding: 12px 20px;
+  font-size: 1.1em;
   font-weight: 500;
   font-family: inherit;
   color: #0f0f0f;
   background-color: #ffffff;
   transition: border-color 0.25s;
-  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
 }
 
 button {
+  background-color: #3c7a89;
   cursor: pointer;
 }
 
 button:hover {
-  border-color: #396cd8;
+  border-color: #285eb6;
 }
 button:active {
   border-color: #396cd8;
@@ -109,4 +110,29 @@ button {
   a:hover {
     color: #24c8db;
   }
+}
+
+body {
+	min-height: 100vh;
+	margin: 0;
+	border-radius: 30px;
+	overflow: hidden;
+	font-family: 'Noto Sans JP', sans-serif;
+	font-weight: bold;
+	color: #7ef87e;
+	text-shadow: 0 0 2px rgba(10, 255, 10, 0.9);
+	text-shadow: 0 0 6px rgba(10, 100, 10, 0.5);
+}
+.address-bar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: #fffff1;
+  color: white;
+}
+
+.frutiger-text {
+  color: #7fbf7f;
+  text-shadow: 0 0 5px rgba(255,255,255,0.6);
 }

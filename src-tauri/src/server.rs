@@ -4,8 +4,9 @@ use tokio::task;
 use tauri::Emitter;
 //use rand::Rng; // session_id のランダム生成用
 
-//use crate::client;
 use crate::server_signal;
+use crate::format_handler::process_format;
+use crate::AI::state::ServerInfo;
 
 // parse_packet も同じファイルに移動したと仮定
 fn parse_packet(payload: &[u8]) -> Option<([u8; 16], [u8; 8], [u8; 2], [u8; 14], Vec<u8>)> {
@@ -22,9 +23,33 @@ fn parse_packet(payload: &[u8]) -> Option<([u8; 16], [u8; 8], [u8; 2], [u8; 14],
 }
 
 
+async fn server_launch_signal(port: &str) -> Result<(), String> {
+    let mut send_buf = [0u8; 1024];
+    let local_port = port.parse::<u16>().map_err(|e| format!("Invalid port number: {}", e))?;
+
+    let packet_len = server_signal::build_server_announce_packet(
+        &mut send_buf,
+        local_port,
+        local_port,
+    );
+
+    let send_socket = tokio::net::UdpSocket::bind("0.0.0.0:0").await
+        .map_err(|e| format!("Failed to create send socket for signal: {}", e))?;
+
+    let broadcast_addr = format!("255.255.255.255:{}", local_port);
+    send_socket.set_broadcast(true)
+        .map_err(|e| format!("Failed to set broadcast: {}", e))?;
+
+    send_socket.send_to(&send_buf[..packet_len], &broadcast_addr).await
+        .map_err(|e| format!("Failed to send server announce signal: {}", e))?;
+
+    println!("Server announce signal sent to {}", broadcast_addr);
+    Ok(())
+}
+
 #[tauri::command]
-pub async fn start_server(app_handle: tauri::AppHandle, ip: String, port: String) -> Result<String, String> {
-    let address = format!("{}:{}", ip, port);
+pub async fn start_server(app_handle: tauri::AppHandle, port: String) -> Result<String, String> {
+    let address = format!("0.0.0.0:{}", port);
     println!("Attempting to bind UDP server to: {}", address);
 
     let socket = match UdpSocket::bind(&address).await {
@@ -40,30 +65,20 @@ pub async fn start_server(app_handle: tauri::AppHandle, ip: String, port: String
     app_handle.emit("server_status", format!("Server started on {}", address))
         .map_err(|e| format!("Failed to emit event: {}", e))?;
 
-    // --- サーバー起動シグナルの送信 ---
-    let mut send_buf = [0u8; 1024]; // 送信用のバッファ
-    let local_port = port.parse::<u16>().map_err(|e| format!("Invalid port number: {}", e))?;
-    
-    // server_signal モジュールからパケット構築関数を呼び出し
-    let packet_len = server_signal::build_server_announce_packet(
-        &mut send_buf,
-        local_port, // 送信元ポート
-        local_port, // 送信先ポート (自分自身を検出するテスト用。実際はブロードキャスト先ポートなど)
-    );
 
-    // シグナル送信用のソケットを別に用意 (task::spawn が socket を move するため)
-    let send_socket = tokio::net::UdpSocket::bind("0.0.0.0:0").await
-        .map_err(|e| format!("Failed to create send socket for signal: {}", e))?;
-    
-    let broadcast_addr = format!("255.255.255.255:{}", local_port); // ブロードキャストアドレスの例
-    send_socket.set_broadcast(true).map_err(|e| format!("Failed to set broadcast: {}", e))?; // ブロードキャスト有効化
+    //cloneよりもarcとか使ったほうが良いのかな？
+    let port_for_signal = port.clone();
+    task::spawn(async move {
+        loop{
+        // 受信ループの起動前に少し待つ（サーバー起動準備時間）
+        tokio::time::sleep(std::time::Duration::from_secs(2)).await;
 
-    // シグナルを送信
-    send_socket.send_to(&send_buf[..packet_len], &broadcast_addr).await
-        .map_err(|e| format!("Failed to send server announce signal: {}", e))?;
-    
-    println!("Server announce signal sent to {}", broadcast_addr);
-    // ------------------------------------
+        //signal送信
+        if let Err(e) = server_launch_signal(&port_for_signal).await {
+            eprintln!("Failed to send server launch signal: {}", e);
+        }
+        }
+    });
 
     task::spawn(async move {
         let mut buf = [0; 1024];
@@ -74,42 +89,11 @@ pub async fn start_server(app_handle: tauri::AppHandle, ip: String, port: String
                         Some((session_id, chunk, format, data_vec, data_payload)) => {
                             let received_data_display: String; // 表示用の文字列を先に定義
 
-                            match format {
-                                [0, 0] => {
-                                    received_data_display = String::from_utf8_lossy(&data_payload).to_string();
-                                },
-                                [0, 1] => {
-                                    received_data_display = hex::encode(&data_payload);
-                                },
-                                
-                                [0xFF, 0xFF] => {
-                                    println!("--- Server Discovery Signal Received ---");
-                                    println!("  Discovered Server IP: {}", addr); // 送信元IPアドレスを表示
-                                    println!("  Session ID: {:x?}", session_id); // シグナルを送ってきたセッションIDも確認用に表示
-                                    println!("  Data Vec (for this signal, might be all zeros/FFs): {:x?}", data_vec); // data_vecも確認用に表示
-                                    
-                                    // シグナルパケットの data_payload に含まれるメッセージを表示
-                                    if let Ok(msg) = String::from_utf8(data_payload.to_vec()) {
-                                        println!("  Signal Message: {}", msg);
-                                        received_data_display = format!("Server Discovered: {} ({})", addr, msg);
-                                    } else {
-                                        received_data_display = format!("Server Discovered: {}", addr);
-                                    }
-                                },
-                                
-                                _ => {
-                                    received_data_display = format!("unsupported format: {:x?}", format);
-                                },
-                            };
+                            let received_data_display = process_format(
+                                    format, session_id, chunk, data_vec, data_payload,
+                                    addr, port.clone(), &app_handle
+                                );
                             
-                            // 各フィールドのログ出力は、display 変数に集約したため不要になる可能性あり
-                            // 例えば `received_data_display` だけ emit するなら、これらはデバッグ時にだけ有効化する
-                            println!("session_id:{:x?}", session_id);
-                            println!("chunk:{:x?}", chunk);
-                            println!("format:{:x?}", format);
-                            println!("data_vec:{:x?}", data_vec);
-                            println!("data:{}", received_data_display);
-
                             if let Err(e) = app_handle.emit("udp_data_received", format!("{} from {}", received_data_display, addr)) {
                                 eprintln!("Failed to emit UDP data event: {}", e);
                             }
@@ -125,7 +109,7 @@ pub async fn start_server(app_handle: tauri::AppHandle, ip: String, port: String
                 }
             }
         }
-    }); // `task::spawn` の閉じカッコ
+    });
 
     Ok(format!("Server started successfully on {}", address))
 }

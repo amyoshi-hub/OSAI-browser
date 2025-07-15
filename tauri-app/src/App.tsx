@@ -5,18 +5,10 @@ import "./App.css";
 const App: React.FC = () => {
   const [url, setUrl] = useState("");
   const [useIframe, setUseIframe] = useState(true);
-  const [iframeSrc, setIframeSrc] = useState("");
-  const [instructionText, setInstructionText] = useState("Iframe MODE Please input URL");
+
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const navigate = useNavigate();
-
-  const updateContent = (newUrl: string) => {
-    if (useIframe) {
-      setIframeSrc(newUrl);
-    } else {
-      window.location.href = newUrl;
-    }
-  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUrl(e.target.value);
@@ -24,14 +16,14 @@ const App: React.FC = () => {
 
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      updateContent(url);
+      switchMode();
+      window.location.href = url;
     }
   };
 
   const switchMode = () => {
     const newMode = !useIframe;
     setUseIframe(newMode);
-    setInstructionText(`NOW: ${newMode ? "Iframe MODE" : "NO Iframe MODE"}`);
   };
 
   const loadP2PPage = () => {
@@ -42,27 +34,46 @@ const App: React.FC = () => {
 	  navigate("/world_page");
   };
 
-  return (
-    <div>
-      <div className="address-bar">
-        <input
-          type="text"
-          value={url}
-          onChange={handleInputChange}
-          onKeyDown={handleInputKeyDown}
-          placeholder="INPUT URL"
-        />
-        <button onClick={switchMode}>Switch Mode</button>
-        <button onClick={loadP2PPage}>P2P</button>
-        <button onClick={loadWorldPage}>WORLD_SELECT</button>
-      </div>
-      <p id="instruct_text">{instructionText}</p>
-      {useIframe && (
-        <iframe id="mainIframe" src={iframeSrc} style={{ width: "100%", height: "calc(100vh - 50px)", border: "none" }} />
-      )}
+return (
+<div>
+  <div className="flex space-x-2">
+  <br></br>
+    <input
+      type="text"
+      value={url}
+      onChange={handleInputChange}
+      onKeyDown={handleInputKeyDown}
+      placeholder="INPUT URL"
+      style={{marginLeft: "2vw"}}
+      className="aqua-input"
+    />
+    <button className="aqua" style={{marginLeft: "1vw"}} onClick={loadP2PPage}>P2P</button>
+    <button className="aqua" style={{marginLeft: "1vw"}} onClick={loadWorldPage}>WORLD_SELECT</button>
+
+  <button
+  onClick={() => setMenuOpen(!menuOpen)}
+  style={{marginLeft: "87vw"}}
+  className="hamburger"
+  >
+   ☰
+  </button>
+
+  {menuOpen && (
+    <div style={{marginLeft: "85vw"}}>
+      <ul className="space-y-2">
+        <button className="aqua" onClick={loadWorldPage}>WORLD_SELECT</button>
+	<br></br><br></br>
+        <button className="aqua" onClick={loadP2PPage}>P2P</button>
+	<br></br><br></br>
+        <button className="aqua" onClick={() => alert("セキュリティ設定 未実装")}>SECURITY</button>
+	<br></br><br></br>
+        <button className="aqua" onClick={() => alert("セキュリティ設定 未実装")}>SETING</button>
+      </ul>
     </div>
-  );
-};
+  )}
+  </div>
 
+</div>
+);
+}
 export default App;
-

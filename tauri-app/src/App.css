@@ -113,15 +113,16 @@ button {
 }
 
 body {
-	min-height: 100vh;
-	margin: 0;
-	border-radius: 30px;
-	overflow: hidden;
-	font-family: 'Noto Sans JP', sans-serif;
-	font-weight: bold;
-	color: #7ef87e;
-	text-shadow: 0 0 2px rgba(10, 255, 10, 0.9);
-	text-shadow: 0 0 6px rgba(10, 100, 10, 0.5);
+        min-height: 100vh;
+        margin: 0;
+        border-radius: 30px;
+        overflow: hidden;
+        font-family: 'Noto Sans JP', sans-serif;
+        font-weight: bold;
+        color: #7ef87e;
+        text-shadow: 0 0 2px rgba(10, 255, 10, 0.9);
+        text-shadow: 0 0 6px rgba(10, 100, 10, 0.5);
+        className: "wobble";
 }
 .address-bar {
   width: 100%;
@@ -136,3 +137,32 @@ body {
   color: #7fbf7f;
   text-shadow: 0 0 5px rgba(255,255,255,0.6);
 }
+@keyframes shine {
+  0%   { background-position: -200%; }
+  100% { background-position: 200%; }
+}
+
+.shine-text {
+  margin-top: 2vh;
+  font-size: 5rem;
+  background: linear-gradient(
+  120deg,
+  rgba(255, 255, 255, 0.5),  /* 50%透明の白 */
+  rgba(255, 255, 255, 0.9),  /* 90%透明の白 */
+  rgba(255, 255, 255, 0.5)   /* 50%透明の白 */
+);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 3s infinite linear;
+}
+@keyframes wobble {
+  0% { transform: rotate(0deg); }
+  50% { transform: rotate(0.4deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.wobble {
+  animation: wobble 3s ease-in-out infinite;
+}
+    

@@ -37,6 +37,9 @@ const App: React.FC = () => {
 return (
 <div>
   <div className="flex space-x-2">
+  <br />
+  <span className="shine-text">OSAI</span>
+  <br />
   <br></br>
     <input
       type="text"

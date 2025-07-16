@@ -4,7 +4,7 @@ use pnet::packet::udp::MutableUdpPacket;
 //use tokio::task;
 
 const END_SIG: u64 = 0xFFFFFFFFFFFFFFFF;
-const CHUNK_SIZE: usize = 1472 - 8 - 16 - 8 - 2 - 14;
+//const CHUNK_SIZE: usize = 1472 - 8 - 16 - 8 - 2 - 14;
 
 fn build_udp_packet<'a>(
     buffer: &'a mut [u8],
@@ -42,16 +42,6 @@ fn build_udp_packet<'a>(
     packet
 }
 
-/*
-pub async fn send_file(
-    app_handle: tauri::AppHandle,
-    src_ip: String,
-    src_port: u16,
-    dst_ip: String,
-    dst_port: u16,
-    filename: String,
-) -> Result<String, String> {
-*/
 pub async fn send_text() -> Result<String, String> {
     use std::net::Ipv4Addr;
     use pnet::transport::{transport_channel, TransportChannelType::Layer4, TransportProtocol};
@@ -66,7 +56,7 @@ pub async fn send_text() -> Result<String, String> {
     let dst_port: u16 = 1234;
     let filename = "ex.txt";
 
-    let src_ip: Ipv4Addr = src_ip.parse().map_err(|e| format!("Invalid src_ip: {}", e))?;
+    let _src_ip: Ipv4Addr = src_ip.parse().map_err(|e| format!("Invalid src_ip: {}", e))?;
     let dst_ip: Ipv4Addr = dst_ip.parse().map_err(|e| format!("Invalid dst_ip: {}", e))?;
 
     // ここで固定値や適当な値を用意
@@ -75,7 +65,7 @@ pub async fn send_text() -> Result<String, String> {
     let data_vec = [0u8; 14];         // 適宜設定
 
     // filenameをcloneしてmoveに持ち込む
-    let filename_clone = filename.clone();
+    let filename_clone = filename;
 
     //本当はasyncのほうが良いのかもしれないが
     spawn( async move {
@@ -85,7 +75,7 @@ pub async fn send_text() -> Result<String, String> {
             Ok((tx, rx)) => {
                 (tx, rx)
             }
-            Err(e) => {
+            Err(_e) => {
                 println!("thread error");
                 return;
             }
@@ -93,7 +83,7 @@ pub async fn send_text() -> Result<String, String> {
 
         let mut file = match File::open(&filename_clone) {
             Ok(f) => f,
-            Err(e) => {
+            Err(_e) => {
                 return;
             }
         };
@@ -104,7 +94,7 @@ pub async fn send_text() -> Result<String, String> {
         loop {
             let read_bytes = match file.read(&mut buffer) {
                 Ok(n) => n,
-                Err(e) => {
+                Err(_e) => {
                     return;
                 }
             };
@@ -138,7 +128,7 @@ pub async fn send_text() -> Result<String, String> {
             println!("To destination: {}", dst_ip);
 
 
-            if let Err(e) = tx.send_to(packet, std::net::IpAddr::V4(dst_ip)) {
+            if let Err(_e) = tx.send_to(packet, std::net::IpAddr::V4(dst_ip)) {
                 return;
             }
 

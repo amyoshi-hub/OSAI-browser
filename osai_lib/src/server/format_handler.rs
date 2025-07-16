@@ -1,7 +1,7 @@
 //use tauri::{AppHandle, Emitter};
 use std::net::SocketAddr;
-use crate::AI::hebbian_local::AI;
-use crate::AI::state::{MY_VEC, W1, W2, SERVER_LIST, ServerInfo};
+use crate::ai::hebbian_local::ai;
+use crate::ai::state::{MY_VEC, W1, W2, SERVER_LIST, ServerInfo};
 
 pub fn process_format(
     format: [u8; 2],
@@ -33,7 +33,7 @@ pub fn process_format(
             let mut w1_guard = W1.lock().unwrap();
             let mut w2_guard = W2.lock().unwrap(); 
 
-            let (new_vec, is_trusted) = AI(*my_vec_guard, input_vec, &mut *w1_guard, &mut *w2_guard);
+            let (new_vec, is_trusted) = ai(*my_vec_guard, input_vec, &mut *w1_guard, &mut *w2_guard);
             if is_trusted {
                 *my_vec_guard = new_vec;
                 //app_handle.emit("trusted_node", "学習データを更新しました").unwrap();

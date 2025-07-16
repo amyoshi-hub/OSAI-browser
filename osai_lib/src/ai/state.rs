@@ -49,8 +49,7 @@ pub static W2: Lazy<Mutex<Vec<Vec<f64>>>> = Lazy::new(|| {
 });
 
 fn rand_init() -> f64 {
-    use rand::Rng;
-    let mut rng = rand::thread_rng();
-    rng.gen_range(-1.0..=1.0)
+    let mut rng = rand::rngs::ThreadRng::default();
+    rand::Rng::random_range(&mut rng, -1.0..=1.0)
 }
 

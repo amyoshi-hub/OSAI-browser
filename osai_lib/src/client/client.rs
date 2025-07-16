@@ -43,94 +43,73 @@ pub fn build_udp_packet<'a>(
 }
 
 pub async fn send_text(
-    //src_ip: String,
-    //src_port: u16,
-    dstIp: String,
-    dstPort: u16,
+    dst_ip: String,
+    dst_port: u16,
     text: String,
 ) -> Result<String, String> {
     use std::net::Ipv4Addr;
     use pnet::transport::{transport_channel, TransportChannelType::Layer4, TransportProtocol};
     use pnet::packet::ip::IpNextHeaderProtocols;
-    use tokio::task::spawn;
+    use std::fs::File;
+    use std::io::Read;
 
     let src_ip = "127.0.0.1";
     let src_port: u16 = 1234;
 
-    let src_ip: Ipv4Addr = src_ip.parse().map_err(|e| format!("Invalid src_ip: {}", e))?;
-    let dst_ip: Ipv4Addr = dstIp.parse().map_err(|e| format!("Invalid dst_ip: {}", e))?;
-    let dst_port = dstPort;
+    let _src_ip: Ipv4Addr = src_ip.parse().map_err(|e| format!("Invalid src_ip: {}", e))?;
+    let dst_ip: Ipv4Addr = dst_ip.parse().map_err(|e| format!("Invalid dst_ip: {}", e))?;
 
-    // ここで固定値や適当な値を用意
-    let session_id = [0u8; 16];       // 本当はランダム等にする
-    let format_signal = [0, 2];     // 適宜設定
-    let data_vec = [5u8; 14];         // 適宜設定
+    let session_id = [0u8; 16];
+    let format_signal = [0, 2];
+    let data_vec = [5u8; 14];
 
-    // filenameをcloneしてmoveに持ち込む
-    let text_clone = text.clone();
+    let protocol = TransportProtocol::Ipv4(IpNextHeaderProtocols::Udp);
+    println!("create protocol");
+    let (mut tx, _) = transport_channel(4096, Layer4(protocol))
+        .map_err(|e| format!("Failed to create channel: {e}"))?;
 
-    //本当はasyncのほうが良いのかもしれないが
-    spawn( async move {
-        let protocol = TransportProtocol::Ipv4(IpNextHeaderProtocols::Udp);
-        println!("create protocol");
-        let (mut tx, _) = match transport_channel(4096, Layer4(protocol)) {
-            Ok((tx, rx)) => (tx, rx),
-            Err(e) => {
-                println!("thread error");
-                return;
-            }
-        };
+    let mut chunk_id = 0u32;
+    let data_chunks = text.as_bytes().chunks(CHUNK_SIZE as usize);
 
-        let mut chunk_id = 0u32;
-        let data_chunk = text.as_bytes().chunks(CHUNK_SIZE.try_into().unwrap());
+    for data_chunk in data_chunks {
+        let chunk = (chunk_id as u64).to_be_bytes();
+        let payload_len = session_id.len() + chunk.len() + format_signal.len() + data_vec.len() + data_chunk.len();
+        let mut packet_buffer = vec![0u8; 8 + payload_len];
 
-        
-
-        for data_chunk in data_chunk{
-
-            if text.is_empty() {
-                break;
-            }    
-
-            // chunkを8バイトの配列に格納（例としてu64をBEで）
-            let chunk = (chunk_id as u64).to_be_bytes();
-
-            // UDPペイロードサイズ計算
-            let payload_len = session_id.len() + chunk.len() + format_signal.len() + data_vec.len() + data_chunk.len();
-            let mut packet_buffer = vec![0u8; 8 + payload_len];  // UDPヘッダー8バイト + payload
-
-            let mut packet = build_udp_packet(
-                &mut packet_buffer,
-                src_port,
-                dst_port,
-                &session_id,
-                &chunk,
-                &format_signal,
-                &data_vec,
-                &data_chunk,
-            );
-
-            if let Err(e) = tx.send_to(packet, std::net::IpAddr::V4(dst_ip)) {
-            }
-
-            chunk_id += 1;
-        }
-
-        // 終了パケット送信（chunk=END_SIG、dataなし）
-        let chunk = END_SIG.to_be_bytes();
-        let mut end_packet_buffer = vec![0u8; 8 + 16 + 8 + 2 + 14];
-        let mut end_packet = build_udp_packet(
-            &mut end_packet_buffer,
+        let packet = build_udp_packet(
+            &mut packet_buffer,
             src_port,
             dst_port,
             &session_id,
             &chunk,
             &format_signal,
             &data_vec,
-            &[],
+            data_chunk,
         );
-        let _ = tx.send_to(end_packet, std::net::IpAddr::V4(dst_ip));
-    });
 
-    Ok(format!("Started sending text: {}", text_clone))
+        if let Err(e) = tx.send_to(packet, std::net::IpAddr::V4(dst_ip)) {
+            eprintln!("Error sending packet: {e}");
+        }
+
+        chunk_id += 1;
+    }
+
+    // 終了パケット送信
+    let chunk = END_SIG.to_be_bytes();
+    let mut end_packet_buffer = vec![0u8; 8 + 16 + 8 + 2 + 14];
+    let end_packet = build_udp_packet(
+        &mut end_packet_buffer,
+        src_port,
+        dst_port,
+        &session_id,
+        &chunk,
+        &format_signal,
+        &data_vec,
+        &[],
+    );
+    let _ = tx.send_to(end_packet, std::net::IpAddr::V4(dst_ip));
+
+    println!("text send");
+    Ok(format!("Started sending text: {}", text))
 }
+

@@ -1,10 +1,11 @@
-use rand::Rng;
+//use rand::Rng;
 
 const INPUT_SIZE: usize = 14;
 const HIDDEN_SIZE: usize = 1024;
 const OUTPUT_SIZE: usize = 14;
 const ALPHA: f64 = 0.1;
-const EPOCHS: usize = 10;
+//ここでforの回数
+const _EPOCHS: usize = 10;
 const SIMI_THRESHOLD: f64 = 0.95;
 
 fn convert_u8_to_f64_array(input: [u8; 14]) -> [f64; 14] {
@@ -28,8 +29,8 @@ fn sigmoid(x: f64) -> f64 {
 }
 
 fn rand_init() -> f64 {
-    let mut rng = rand::thread_rng();
-    rng.gen_range(-1.0..=1.0)
+    let mut rng = rand::rngs::ThreadRng::default();
+    rand::Rng::random_range(&mut rng, -1.0..=1.0)
 }
 
 
@@ -109,7 +110,7 @@ fn check_similarity(a: [u8; 14], b: [u8; 14]) -> f64 {
     match_count as f64 / 14.0
 }
 
-pub fn AI(my_vec: [u8; 14], target_vec: [u8; 14], w1: &mut Vec<Vec<f64>>, w2: &mut Vec<Vec<f64>>) -> ([u8; 14], bool) {
+pub fn ai(my_vec: [u8; 14], target_vec: [u8; 14], w1: &mut Vec<Vec<f64>>, w2: &mut Vec<Vec<f64>>) -> ([u8; 14], bool) {
     let my_input_f64 = convert_u8_to_f64_array(my_vec);
     let target_f64 = convert_u8_to_f64_array(target_vec);
 

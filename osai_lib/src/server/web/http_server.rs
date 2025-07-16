@@ -4,7 +4,8 @@ use reqwest;
 use serde::Deserialize;
 //use std::fs;
 //use std::path::Path;
-use base64;
+use base64::engine::general_purpose;
+use base64::Engine;
 
 pub async fn http_server() {
     let dir = "/share";
@@ -57,7 +58,7 @@ pub async fn request_file(file_name: String, ip: String) -> Result<String, Strin
     // バイナリデータを取得
     //let bytes = response.bytes().await.map(|bytes| bytes.to_vec()).map_err(|e| format!("レスポンス読み込み失敗: {}", e));
     let bytes = response.bytes().await.map_err(|e| format!("レスポンス読み込み失敗: {}", e))?;
-    let base64_encoded = base64::encode(&bytes);
+    let base64_encoded = general_purpose::STANDARD.encode(&bytes);
     Ok(base64_encoded)
 }
 

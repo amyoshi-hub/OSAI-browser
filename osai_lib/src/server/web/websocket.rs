@@ -78,7 +78,7 @@ async fn handle_websocket_connection(stream: tokio::net::TcpStream, peer_addr: s
                     tokio_tungstenite::tungstenite::Message::Binary(bin) => {
                         println!("Received binary message from {}: len={}", peer_addr, bin.len());
                     },
-                    tokio_tungstenite::tungstenite::Message::Ping(ping_data) => {
+                    tokio_tungstenite::tungstenite::Message::Ping(_ping_data) => {
                         println!("Received Ping from {}", peer_addr);
                     },
                     tokio_tungstenite::tungstenite::Message::Pong(_) => {

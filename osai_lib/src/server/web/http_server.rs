@@ -1,19 +1,11 @@
-use std::convert::Infallible;
+//use std::convert::Infallible;
 //use warp::Filter;
-use tauri::AppHandle;
-use tauri::{WebviewUrl};
-use tauri::webview::WebviewWindowBuilder;
 use reqwest;
 use serde::Deserialize;
 //use std::fs;
 //use std::path::Path;
 use base64;
 
-async fn hello(name: String) -> Result<impl warp::Reply, Infallible> {
-    Ok(format!("hello {}!", name))
-}
-
-#[tauri::command]
 pub async fn http_server() {
     let dir = "/share";
 
@@ -25,21 +17,11 @@ pub async fn http_server() {
         .await;
 }
 
-#[tauri::command]
-pub fn open_url_window(app_handle: AppHandle, url: String) -> Result<(), String> {
-    WebviewWindowBuilder::new(&app_handle, "new_window", WebviewUrl::External(url.parse().unwrap()))
-        .title("New Window")
-        .build()
-        .map_err(|e| e.to_string())?;
-    Ok(())
-}
-
 #[derive(Debug, Deserialize)]
 pub struct FileList {
     pub files: Vec<String>,
 }
 
-#[tauri::command]
 pub async fn fetch_file_list(url: String) -> Result<Vec<String>, String> {
     // GETリクエスト
     let resp = reqwest::get(&url)
@@ -59,7 +41,6 @@ pub async fn fetch_file_list(url: String) -> Result<Vec<String>, String> {
     Ok(file_list.files)
 }
 
-#[tauri::command]
 pub async fn request_file(file_name: String, ip: String) -> Result<String, String> {
     let file_url = format!("http://{}:1234/share/{}", ip, file_name);
 

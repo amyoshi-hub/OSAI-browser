@@ -1,4 +1,4 @@
-use std::path::{self, PathBuf};
+use std::path::{PathBuf};
 use std::error::Error;
 use std::fs;
 
@@ -27,7 +27,6 @@ fn read_dir(dir_path: &str) -> Result<Vec<PathBuf>, Box<dyn Error>> {
     Ok(files)
 }
 
-#[tauri::command]
 pub async fn get_file_list() -> Result<Vec<String>, String> {
     // "share" ディレクトリのパスを取得または作成
     let base_dir = get_or_create_share_dir()

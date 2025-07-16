@@ -1,12 +1,11 @@
-use tauri::{AppHandle};
+//use tauri::{AppHandle};
 use tokio::net::TcpListener;
 use tokio_tungstenite::accept_async;
 use futures_util::{StreamExt, SinkExt};
-use tauri::Emitter;
+//use tauri::Emitter;
 
 // WebSocketサーバーをバックグラウンドで開始するTauriコマンド
-#[tauri::command]
-pub async fn start_websocket_server(app_handle: AppHandle, ip: String, port: String) -> Result<String, String> {
+pub async fn start_websocket_server(ip: String, port: String) -> Result<String, String> {
     let addr = format!("{}:{}", ip, port);
     println!("Attempting to start WebSocket server at: {}", addr);
 
@@ -23,21 +22,18 @@ pub async fn start_websocket_server(app_handle: AppHandle, ip: String, port: Str
                 let error_msg = format!("Failed to bind WebSocket server to {}: {}", addr_clone_for_spawn, e); // <-- Use addr_clone_for_spawn
                 eprintln!("{}", error_msg);
                 // フロントエンドへのエラー通知
-                let _ = app_handle.emit("server_status", error_msg);
                 return;
             }
         };
         println!("WebSocket server listening on: {}", addr_clone_for_spawn); // <-- Use addr_clone_for_spawn
-        let _ = app_handle.emit("server_status", format!("WebSocket server started on ws://{}/ws", addr_clone_for_spawn)); // <-- Use addr_clone_for_spawn
 
         loop {
             match listener.accept().await {
                 Ok((stream, peer_addr)) => {
                     println!("New WebSocket connection from: {}", peer_addr);
-                    let _ = app_handle.emit("server_status", format!("New WebSocket connection from: {}", peer_addr));
 
                     // 各接続を非同期タスクで処理
-                    tokio::spawn(handle_websocket_connection(app_handle.clone(), stream, peer_addr));
+                    tokio::spawn(handle_websocket_connection(stream, peer_addr));
                 }
                 Err(e) => {
                     eprintln!("Error accepting WebSocket connection: {}", e);
@@ -51,12 +47,11 @@ pub async fn start_websocket_server(app_handle: AppHandle, ip: String, port: Str
     Ok(format!("Attempting to start WebSocket server on {}", addr)) // <-- Use the original 'addr'
 }
 
-async fn handle_websocket_connection(app_handle: AppHandle, stream: tokio::net::TcpStream, peer_addr: std::net::SocketAddr) {
+async fn handle_websocket_connection(stream: tokio::net::TcpStream, peer_addr: std::net::SocketAddr) {
     let ws_stream = match accept_async(stream).await {
         Ok(ws) => ws,
         Err(e) => {
             eprintln!("Error during WebSocket handshake from {}: {}", peer_addr, e);
-            let _ = app_handle.emit("server_status", format!("WebSocket handshake failed from {}: {}", peer_addr, e));
             return;
         }
     };
@@ -70,7 +65,6 @@ async fn handle_websocket_connection(app_handle: AppHandle, stream: tokio::net::
                 match msg {
                     tokio_tungstenite::tungstenite::Message::Text(text) => {
                         println!("Received text message from {}: {}", peer_addr, text);
-                        let _ = app_handle.emit("received_websocket_message", format!("Received from {}: {}", peer_addr, text));
 
                         // Ensure 'into()' is used for String to Message conversion if it's not implicit
                         if let Err(e) = write.send(tokio_tungstenite::tungstenite::Message::Text(format!("Echo: {}", text).into())).await {
@@ -83,7 +77,6 @@ async fn handle_websocket_connection(app_handle: AppHandle, stream: tokio::net::
                     },
                     tokio_tungstenite::tungstenite::Message::Binary(bin) => {
                         println!("Received binary message from {}: len={}", peer_addr, bin.len());
-                        let _ = app_handle.emit("received_websocket_message", format!("Received binary from {}: len={}", peer_addr, bin.len()));
                     },
                     tokio_tungstenite::tungstenite::Message::Ping(ping_data) => {
                         println!("Received Ping from {}", peer_addr);
@@ -101,11 +94,9 @@ async fn handle_websocket_connection(app_handle: AppHandle, stream: tokio::net::
             }
             Err(e) => {
                 eprintln!("Error receiving message from {}: {}", peer_addr, e);
-                let _ = app_handle.emit("server_status", format!("Error on WebSocket from {}: {}", peer_addr, e));
                 break;
             }
         }
     }
     println!("WebSocket connection to {} closed.", peer_addr);
-    let _ = app_handle.emit("server_status", format!("WebSocket connection to {} closed.", peer_addr));
 }

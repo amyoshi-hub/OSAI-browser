@@ -2,5 +2,5 @@
 members = [
   "src-tauri",
   "cli",
-  "osai-lib"
+  "osai_lib"
 ]

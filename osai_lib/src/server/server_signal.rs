@@ -1,5 +1,5 @@
 use rand::Rng; // rand::Rng の機能を使うために必要
-use crate::client::build_udp_packet; // client モジュールの build_udp_packet 関数をインポート
+use crate::client::client::build_udp_packet; // client モジュールの build_udp_packet 関数をインポート
 
 pub fn build_server_announce_packet(
     buffer: &mut [u8],

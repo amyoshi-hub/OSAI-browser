@@ -1,4 +1,4 @@
-use tauri::{AppHandle, Emitter};
+//use tauri::{AppHandle, Emitter};
 use std::net::SocketAddr;
 use crate::AI::hebbian_local::AI;
 use crate::AI::state::{MY_VEC, W1, W2, SERVER_LIST, ServerInfo};
@@ -6,12 +6,11 @@ use crate::AI::state::{MY_VEC, W1, W2, SERVER_LIST, ServerInfo};
 pub fn process_format(
     format: [u8; 2],
     session_id: [u8; 16],
-    chunk: [u8; 8],
+    _chunk: [u8; 8],
     data_vec: [u8; 14],
     data_payload: Vec<u8>,
     addr: SocketAddr,
     port: String,
-    app_handle: &AppHandle,
 ) -> String {
     println!("format:{:x?}", format);
     println!("data_vec:{:x?}", data_vec);
@@ -63,9 +62,6 @@ pub fn process_format(
             if !list.contains(&server_info) {
                 list.insert(server_info.clone());
                 println!("重複していない server:{}", server_info.addr); 
-                if let Err(e) = app_handle.emit("add_server", server_info) {
-                    eprintln!("Failed to emit add_server event: {}", e);
-                }
             }else{
                 println!("重複サーバ skip server:{}:{}", server_info.addr, server_info.port);
             }

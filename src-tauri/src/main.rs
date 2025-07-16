@@ -21,11 +21,12 @@ use server_list::request_server_list;
 mod AI;
 mod format_handler;
 
-trait OSAI{
 
-}
-
-impl OSAI{
+#[cfg(feature = "cui")]
+#[tokio::main]
+async fn main(){
+    Builder::default()
+        .invoke_handler(tauri::generate_handler![
             start_server,
             send_text,
             process_and_add_world,
@@ -39,9 +40,32 @@ impl OSAI{
             fetch_file_list,
             request_file,
             request_server_list,
+        ])
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
 }
 
+#[cfg(feature = "gui")]
 #[tokio::main]
-async fn main(){
-    OSAI::new(); 
+async fn main() {
+    Builder::default()
+        // generate_handler!に複数のコマンドを渡せます
+        .invoke_handler(tauri::generate_handler![
+            start_server,
+            send_text,
+            process_and_add_world,
+            get_world_list,
+//            read_text_file,
+            open_world,
+            start_websocket_server,
+            get_file_list,
+            read_file_content,
+            http_server,
+            open_url_window,
+            fetch_file_list,
+            request_file,
+            request_server_list,
+        ])
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
 }

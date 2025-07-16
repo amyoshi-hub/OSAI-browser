@@ -26,7 +26,9 @@ trait OSAI{
 }
 
 impl OSAI{
-            start_server,
+            let port = String::new();
+            //pub async fn start_server(app_handle: tauri::AppHandle, port: String) ->これでもこのまま呼べる？
+            start_server(port),
             send_text,
             process_and_add_world,
             get_world_list,
@@ -41,7 +43,3 @@ impl OSAI{
             request_server_list,
 }
 
-#[tokio::main]
-async fn main(){
-    OSAI::new(); 
-}

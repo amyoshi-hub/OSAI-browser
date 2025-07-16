@@ -122,6 +122,7 @@ body {
 	color: #7ef87e;
 	text-shadow: 0 0 2px rgba(10, 255, 10, 0.9);
 	text-shadow: 0 0 6px rgba(10, 100, 10, 0.5);
+	className: "wobble";
 }
 .address-bar {
   width: 100%;
@@ -135,4 +136,25 @@ body {
 .frutiger-text {
   color: #7fbf7f;
   text-shadow: 0 0 5px rgba(255,255,255,0.6);
+}
+@keyframes shine {
+  0%   { background-position: -200%; }
+  100% { background-position: 200%; }
+}
+
+.shine-text {
+  background: linear-gradient(120deg, #ffffff33, #ffffffaa, #ffffff33);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 3s infinite linear;
+}
+@keyframes wobble {
+  0% { transform: rotate(0deg); }
+  50% { transform: rotate(0.4deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.wobble {
+  animation: wobble 3s ease-in-out infinite;
 }

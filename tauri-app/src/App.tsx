@@ -38,6 +38,8 @@ return (
 <div>
   <div className="flex space-x-2">
   <br></br>
+  	<br className="shine">OSAI</br>
+  <br></br>
     <input
       type="text"
       value={url}

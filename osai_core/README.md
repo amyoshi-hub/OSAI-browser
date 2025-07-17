@@ -1,4 +1,9 @@
-use osai_lib::OSAI;
+## OSAI_core
+osai_core is the low-level engine for the OSAI system, supporting AI interactions via WebSocket and HTTP. Designed for Raspberry Pi and local edge AI deployments.
+
+## Exsample
+```rs
+use osai_core::OSAI;
 use std::io::{Write};
 use std::io;
 
@@ -21,4 +26,8 @@ async fn main() {
         println!("no cmd"); 
     }
 }
-
+```
+## feature
+- run: luanch the OSAI server
+- http_server: luanch http_server serving file API
+- send_text: CLI interface for sending formatted OSAI messages

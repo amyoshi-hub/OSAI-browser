@@ -1,7 +1,13 @@
 [package]
-name = "osai_lib"
+name = "osai_core"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
+license="MIT"
+description = "Core logic for OSAI browser-based AI systems"
+readme = "README.md"
+keywords = ["OSAI", "AI", "WebSocket", "file_server"]
+categories = ["network-programming", "web-programming::http-server"]
+
 
 [dependencies]
 base64 = "0.22.1"

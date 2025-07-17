@@ -54,6 +54,14 @@ impl OSAI{
         send_text(dst_ip, dst_port, text).await;
     }
 
+    pub fn request_http(ip: &str){
+        let mut ip = String::new();
+        io::stdin().read_line(&mut ip);
+
+        let url = format!("http://{}/share/files.json", ip);
+        fetch_file_list(url);
+    }
+
     pub async fn http_server() -> Result<(), warp::Error>{
         let _ = http_server().await?;
         Ok(())

@@ -17,6 +17,8 @@ async fn main() {
         OSAI::http_server().await;
     }else if cmd == "text" {
         OSAI::send_text_cli().await;
+    }else if cmd == "r_file" {
+            OSAI::request_http("172.20.10.2");
     }else{
         println!("no cmd"); 
     }

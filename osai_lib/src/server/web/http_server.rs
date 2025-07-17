@@ -1,5 +1,8 @@
 //use std::convert::Infallible;
-//use warp::Filter;
+use local_ip_address::local_ip;
+use std::net::IpAddr;
+use std::net::Ipv4Addr;
+use warp::Filter;
 use reqwest;
 use serde::Deserialize;
 //use std::fs;
@@ -7,15 +10,25 @@ use serde::Deserialize;
 use base64::engine::general_purpose;
 use base64::Engine;
 
-pub async fn http_server() {
+pub async fn http_server() -> Result<(), warp::Error>{
     let dir = "/share";
-
     let files = warp::fs::dir(dir);
 
-    println!("Starting HTTP file server at http://127.0.0.1:1234/");
+    // ローカルIPアドレスを取得
+    let ip: IpAddr = match local_ip() {
+        Ok(ip) => ip,
+        Err(_) => {
+            eprintln!("Failed to get local IP address. Using 127.0.0.1");
+            IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1))
+        }
+    };
+
+    println!("Starting HTTP file server at http://{}:1234/", ip);
+
     warp::serve(files)
-        .run(([127, 0, 0, 1], 1234))
+        .run((ip, 1234))
         .await;
+    Ok(())
 }
 
 #[derive(Debug, Deserialize)]

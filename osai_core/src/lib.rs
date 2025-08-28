@@ -4,6 +4,7 @@ use std::io;
 
 pub mod server;
 pub mod client;
+use vocaloid;
 
 /*
 pub mod file_copy;
@@ -67,6 +68,11 @@ impl OSAI{
         Ok(())
     }
 
+    pub fn vocaloid() -> Result<(), hound::Error>{
+        vocaloid::emotion_vocaloid();     
+        Ok(())
+    }
+
     pub async fn run(&self) -> Result<(), String>{
         let _ = start_server("8080".to_string()).await?;
         
@@ -80,5 +86,8 @@ impl OSAI{
         //request_file();
         Ok(())
     }
+    
+    
+
 }
 

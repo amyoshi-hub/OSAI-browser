@@ -3,7 +3,7 @@ use std::io::{Write};
 use std::io;
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), hound::Error>{
 
     println!("input command");
     let mut in_cmd = String::new();
@@ -19,8 +19,11 @@ async fn main() {
         OSAI::send_text_cli().await;
     }else if cmd == "r_file" {
             OSAI::request_http("172.20.10.2");
+    }else if cmd == "vocaloid" {
+            OSAI::vocaloid()?;
     }else{
         println!("no cmd"); 
     }
+    Ok(())
 }
 

@@ -44,9 +44,8 @@ pub fn process_format(
         }
 
         [0xFF, 0xFF] => {
-            println!("--- Server Discovery Signal Received ---");
-            println!("  Discovered Server IP: {}", addr);
-            println!("  Discovered Server PORT: {}", port);
+            println!("--- Signal ---");
+            println!("  IP: {} PORT: {}", addr, port);
             println!("  Session ID: {:x?}", session_id);
             println!("  Data Vec: {:x?}", data_vec);
 
@@ -61,14 +60,13 @@ pub fn process_format(
             let mut list = SERVER_LIST.lock().unwrap();
             if !list.contains(&server_info) {
                 list.insert(server_info.clone());
-                println!("重複していない server:{}", server_info.addr); 
+                println!("not duplicate server:{}", server_info.addr); 
             }else{
-                println!("重複サーバ skip server:{}:{}", server_info.addr, server_info.port);
+                println!("dup server:{}:{}", server_info.addr, port);
             }
 
             if let Ok(msg) = String::from_utf8(data_payload) {
-                println!("  Signal Message: {}", msg);
-                format!("Server Discovered: {} ({})", addr, msg)
+                format!("Server Discovered: {} Msg({})", addr, msg)
             } else {
                 format!("Server Discovered: {}", addr)
             }

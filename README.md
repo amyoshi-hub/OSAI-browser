@@ -58,6 +58,9 @@ please include "index.html" in zip file
 ## process
 - now divideing to library
 
+## my crate
+- vocaloid
+- osai_core
 
 ## Suitable value list
 now I set some suitable value
@@ -66,8 +69,6 @@ now I set some suitable value
 - AI::weight
 - format_handler->vocaloid::input_Vec[0]
 now it gonna flow vocaloid if input_vec[0] > 10, but We consider overroll; 2logical
-
-
 
 ## issue
 - now sendText was success only extension 127~

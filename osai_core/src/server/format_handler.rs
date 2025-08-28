@@ -3,6 +3,8 @@ use std::net::SocketAddr;
 use crate::ai::hebbian_local::ai;
 use crate::ai::state::{MY_VEC, W1, W2, SERVER_LIST, ServerInfo};
 
+use crate::fileIO::create_lyric::create_lyric;
+
 pub fn process_format(
     format: [u8; 2],
     session_id: [u8; 16],
@@ -40,7 +42,16 @@ pub fn process_format(
             } else {
                 //app_handle.emit("enemy_detected", "敵シグナルを検知").unwrap();
             }
-            format!("AI check result: trusted={}", is_trusted) 
+
+            //vocaloid logic
+            let text = String::from_utf8_lossy(&data_payload).to_string();
+            if input_vec[0] > 4 {
+                create_lyric(&text, input_vec);
+                println!("lyric created");
+            }else{
+                println!("lyric didnot created");
+            }
+            format!("AI check result: trusted={}", is_trusted)
         }
 
         [0xFF, 0xFF] => {

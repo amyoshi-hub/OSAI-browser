@@ -1,6 +1,7 @@
 use std::io::{Write};
 use std::io;
 
+pub mod fileIO;
 
 pub mod server;
 pub mod client;

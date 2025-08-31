@@ -3,4 +3,4 @@ members = [
   "src-tauri",
   "cli",
   "osai_core"
-]
+, "test_area"]

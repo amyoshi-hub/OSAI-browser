@@ -6,6 +6,7 @@ pub mod fileIO;
 pub mod server;
 pub mod client;
 use vocaloid;
+use std::process::Command;
 
 /*
 pub mod file_copy;
@@ -39,13 +40,13 @@ impl OSAI{
         let mut dst_ip = String::new();
         let mut dst_port = String::new();
         let mut text = String::new();
-        println!("sendTo:");
+        print!("sendTo:");
         io::stdout().flush().unwrap();
         io::stdin().read_line(&mut dst_ip).unwrap();
-        println!("sendPort:");
+        print!("sendPort:");
         io::stdout().flush().unwrap();
         io::stdin().read_line(&mut dst_port).unwrap();
-        println!("sendText:");
+        print!("sendText:");
         io::stdout().flush().unwrap();
         io::stdin().read_line(&mut text).unwrap();
 
@@ -73,6 +74,18 @@ impl OSAI{
         vocaloid::emotion_vocaloid();     
         Ok(())
     }
+
+    pub fn play() {
+        let output = Command::new("aplay")
+            .arg("output.wav")
+            .output()
+            .expect("faild to call");
+
+        print!("status: {}", output.status);
+        print!("stdout: {}", String::from_utf8_lossy(&output.stdout));
+        print!("stderr: {}", String::from_utf8_lossy(&output.stderr));
+    }
+
 
     pub async fn run(&self) -> Result<(), String>{
         let _ = start_server("8080".to_string()).await?;

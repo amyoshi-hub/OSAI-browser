@@ -1,3 +1,7 @@
+# Development discounted
+moved here
+https://github.com/amyoshi-hub/MEKOU-Browser
+
 # OSAI-browser
 - OSAI-browser is a new type of browser, designed with peer-to-peer (P2P) and AI culclation functionality at its core.
 - apply to add tool as WORLD
